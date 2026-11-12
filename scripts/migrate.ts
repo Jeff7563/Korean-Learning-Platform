@@ -1,0 +1,12 @@
+import Database from "better-sqlite3";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { mkdirSync } from "node:fs";
+const dbPath = join(process.cwd(), "data", "korean.db");
+mkdirSync(join(process.cwd(), "data"), { recursive: true });
+const db = new Database(dbPath);
+db.pragma("foreign_keys = ON");
+const sql = readFileSync(join(process.cwd(), "drizzle", "0001_init.sql"), "utf8");
+db.exec(sql);
+db.prepare("INSERT OR IGNORE INTO schema_migrations(name) VALUES (?)").run("0001_init.sql");
+console.log(`Migration ready: ${dbPath}`); db.close();

@@ -1,0 +1,17 @@
+PRAGMA foreign_keys = ON;
+CREATE TABLE IF NOT EXISTS courses (id INTEGER PRIMARY KEY, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS modules (id INTEGER PRIMARY KEY, course_id INTEGER NOT NULL REFERENCES courses(id) ON DELETE CASCADE, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, position INTEGER NOT NULL, UNIQUE(course_id, position));
+CREATE TABLE IF NOT EXISTS lessons (id INTEGER PRIMARY KEY, module_id INTEGER NOT NULL REFERENCES modules(id) ON DELETE CASCADE, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, description TEXT NOT NULL, content_json TEXT NOT NULL, position INTEGER NOT NULL, UNIQUE(module_id, position));
+CREATE TABLE IF NOT EXISTS lesson_resources (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE, kind TEXT NOT NULL, title TEXT NOT NULL, url TEXT NOT NULL, external_id TEXT, creator TEXT, metadata_json TEXT NOT NULL DEFAULT '{}');
+CREATE TABLE IF NOT EXISTS vocabulary (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE, korean TEXT NOT NULL, thai TEXT NOT NULL, UNIQUE(lesson_id,korean));
+CREATE TABLE IF NOT EXISTS lesson_activities (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE, slug TEXT NOT NULL, title TEXT NOT NULL, position INTEGER NOT NULL, UNIQUE(lesson_id,slug));
+CREATE TABLE IF NOT EXISTS learner_activity_progress (id INTEGER PRIMARY KEY, activity_id INTEGER NOT NULL REFERENCES lesson_activities(id) ON DELETE CASCADE, completed_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP, UNIQUE(activity_id));
+CREATE TABLE IF NOT EXISTS exercises (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id) ON DELETE CASCADE, position INTEGER NOT NULL, prompt TEXT NOT NULL, options_json TEXT NOT NULL, answer_index INTEGER NOT NULL, explanation TEXT NOT NULL, UNIQUE(lesson_id,position));
+CREATE TABLE IF NOT EXISTS checkpoint_attempts (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id), score INTEGER NOT NULL, total INTEGER NOT NULL, passed INTEGER NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS checkpoint_answers (id INTEGER PRIMARY KEY, attempt_id INTEGER NOT NULL REFERENCES checkpoint_attempts(id) ON DELETE CASCADE, exercise_id INTEGER NOT NULL REFERENCES exercises(id), selected_index INTEGER NOT NULL, correct INTEGER NOT NULL);
+CREATE TABLE IF NOT EXISTS learner_lesson_progress (lesson_id INTEGER PRIMARY KEY REFERENCES lessons(id), status TEXT NOT NULL DEFAULT 'available' CHECK(status IN ('available','in_progress','completed')), updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS tutor_messages (id INTEGER PRIMARY KEY, lesson_id INTEGER NOT NULL REFERENCES lessons(id), role TEXT NOT NULL CHECK(role IN ('user','assistant')), content TEXT NOT NULL, created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE TABLE IF NOT EXISTS learner_settings (id INTEGER PRIMARY KEY CHECK(id=1), learning_goal TEXT NOT NULL DEFAULT 'เตรียมพื้นฐานภาษาเกาหลีและ EPS-TOPIK', daily_minutes INTEGER NOT NULL DEFAULT 90, preferred_language TEXT NOT NULL DEFAULT 'th');
+CREATE TABLE IF NOT EXISTS schema_migrations (name TEXT PRIMARY KEY, applied_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP);
+CREATE INDEX IF NOT EXISTS idx_attempt_lesson_date ON checkpoint_attempts(lesson_id,created_at);
+CREATE INDEX IF NOT EXISTS idx_vocab_lesson ON vocabulary(lesson_id);
