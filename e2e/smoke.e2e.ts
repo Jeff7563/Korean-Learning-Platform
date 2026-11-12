@@ -1,6 +1,6 @@
 import {test,expect} from "@playwright/test";
 test("learner completes lesson one and progress survives reload",async({page,request})=>{
- const first=await request.get("/api/lessons/hangul-intro");expect(first.ok()).toBeTruthy();const lesson=await first.json();
+ const first=await request.get("/api/lessons/hangul-intro");expect(first.ok()).toBeTruthy();const lesson=await first.json();expect(lesson.lesson).not.toHaveProperty("questions");expect(JSON.stringify(lesson)).not.toMatch(/"(answer|answer_index|answerKey|correctAnswer)"/i);expect(lesson.exercises.every((exercise:{answer?:unknown;answer_index?:unknown})=>exercise.answer===undefined&&exercise.answer_index===undefined)).toBe(true);
  await request.post("/api/activities",{data:{activityId:lesson.activities[0].id,completed:false}});
  await page.goto("/dashboard");await expect(page.getByRole("heading",{name:/สวัสดี, ผู้เรียน/})).toBeVisible();
  await page.getByRole("link",{name:/เรียนต่อ/}).click();await expect(page.getByRole("heading",{name:/รู้จัก/})).toBeVisible();await expect(page.getByTitle(/Hangul Song/)).toBeVisible();
