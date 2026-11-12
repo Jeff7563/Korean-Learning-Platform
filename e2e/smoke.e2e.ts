@@ -5,17 +5,19 @@ test("learner completes a lesson and progress survives reload", async ({ page, r
   expect(first.ok()).toBeTruthy();
   const lesson = await first.json();
   expect(lesson.lesson).not.toHaveProperty("questions");
+  expect(lesson.lesson.videoResources).toHaveLength(3);
   expect(JSON.stringify(lesson)).not.toMatch(/"(answer|answer_index|answerKey|correctAnswer)"/i);
   expect(lesson.exercises.every((exercise: { answer?: unknown; answer_index?: unknown }) => exercise.answer === undefined && exercise.answer_index === undefined)).toBe(true);
   await request.post("/api/activities", { data: { activityId: lesson.activities[0].id, completed: false } });
 
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { name: "ยินดีต้อนรับกลับมา" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "เช็กลิสต์บทเรียนถัดไป" })).toBeVisible();
   await expect(page.locator(".daily-item").first()).toBeVisible();
   await page.locator(".hero-action").click();
   await expect(page).toHaveURL(/\/learn\//);
   await expect(page.getByRole("heading", { name: lesson.lesson.title })).toBeVisible();
-  await expect(page.locator(".video-stage")).toBeVisible();
+  await expect(page.locator(".media-frame")).toBeVisible();
 
   const checkbox = page.getByRole("checkbox").first();
   await Promise.all([page.waitForResponse(response => response.url().endsWith("/api/activities") && response.status() === 200), checkbox.click()]);

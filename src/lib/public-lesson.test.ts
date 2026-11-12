@@ -18,4 +18,9 @@ describe("public lesson projection", () => {
     expect(lesson).not.toHaveProperty("answerKey");
     expect(JSON.stringify(lesson)).not.toMatch(/answer|secret|private/i);
   });
+
+  it("does not expose an unverified legacy video field", () => {
+    const lesson = publicLessonContent({ slug: "x", title: "t", description: "d", objectives: [], explanation: "e", examples: [], activities: [], vocabulary: [], video: { id: "legacy", url: "https://example.test", creator: "unknown", title: "unverified" } });
+    expect(lesson).not.toHaveProperty("video");
+  });
 });

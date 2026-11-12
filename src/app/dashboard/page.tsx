@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight, Award, BookOpen, CalendarDays, Check, Circle, Clock3, Flame, Play, Target } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CalendarDays, Check, CheckCircle2, Circle, Clock3, Play, Target } from "lucide-react";
 
 type LessonStatus = "locked" | "available" | "in_progress" | "completed";
 type CourseLesson = { id:number; slug:string; title:string; description:string; position:number; status:LessonStatus; passed:boolean };
@@ -39,8 +39,8 @@ export default function Dashboard() {
   }
 
   const next=data?.next??data?.lessons.at(-1);
-  const doneToday=activities.filter(item=>item.completed).length;
-  const allToday=activities.length>0&&doneToday===activities.length;
+  const completedActivities=activities.filter(item=>item.completed).length;
+  const allActivitiesComplete=activities.length>0&&completedActivities===activities.length;
 
   return <div className="shell dashboard-v2">
     <header className="dashboard-topline"><div><p className="eyebrow">LEARN AT YOUR PACE</p><h1>ยินดีต้อนรับกลับมา</h1><p className="dashboard-subtitle">เรียนทีละบท ฝึกสม่ำเสมอ แล้วภาษาเกาหลีจะค่อย ๆ เป็นของคุณ</p></div><Link href="/courses" className="text-link">ดูหลักสูตร <ArrowRight size={16}/></Link></header>
@@ -62,16 +62,16 @@ export default function Dashboard() {
       <Stat icon={<BookOpen/>} label="บทเรียนที่ผ่าน" value={data?`${data.completed} / ${data.total}`:"—"} detail="บทเรียนในหลักสูตร" tone="blue"/>
       <Stat icon={<Award/>} label="ความแม่นยำล่าสุด" value={recentAccuracy===null?"—":`${recentAccuracy}%`} detail={data?.recent.length?`จาก ${data.recent.length} แบบทดสอบล่าสุด`:"เริ่มทำแบบทดสอบเพื่อดูผล"} tone="amber"/>
       <Stat icon={<Target/>} label="เป้าหมายต่อวัน" value={data?.settings?.daily_minutes?`${data.settings.daily_minutes} นาที`:"ยังไม่ตั้งเป้า"} detail="ปรับเป้าหมายได้ในตั้งค่า" tone="teal"/>
-      <Stat icon={<Flame/>} label="กิจกรรมวันนี้" value={activities.length?`${doneToday} / ${activities.length}`:"—"} detail={allToday?"ทำครบแล้ว เยี่ยมมาก":"จากเช็กลิสต์บทเรียนถัดไป"} tone="indigo"/>
+      <Stat icon={<CheckCircle2/>} label="กิจกรรมบทเรียน" value={activities.length?`${completedActivities} / ${activities.length}`:"—"} detail={allActivitiesComplete?"ทำกิจกรรมบทเรียนครบแล้ว":"เช็กลิสต์บทเรียนถัดไป"} tone="indigo"/>
     </section>
 
     <div className="dashboard-workspace">
       <div className="dashboard-main-column">
         <section className="panel daily-panel" aria-labelledby="daily-title">
-          <div className="section-heading"><div className="section-icon daily-icon"><CalendarDays size={19}/></div><div><p className="eyebrow">TODAY’S PRACTICE</p><h2 id="daily-title">เช็กลิสต์การเรียนวันนี้</h2></div><span className="completion-count">{doneToday}/{activities.length||0}</span></div>
-          <p className="section-intro">{data?.today??"กำลังโหลดตารางเรียน…"} · ติ๊กกิจกรรมเมื่อทำเสร็จ ความคืบหน้าจะถูกบันทึกให้อัตโนมัติ</p>
+          <div className="section-heading"><div className="section-icon daily-icon"><CalendarDays size={19}/></div><div><p className="eyebrow">NEXT LESSON CHECKLIST</p><h2 id="daily-title">เช็กลิสต์บทเรียนถัดไป</h2></div><span className="completion-count">{completedActivities}/{activities.length||0}</span></div>
+          <p className="section-intro">กิจกรรมที่บันทึกไว้ในบทเรียนถัดไป · ติ๊กเมื่อทำเสร็จ สถานะจะคงอยู่จนกว่าคุณจะเปลี่ยนเอง</p>
           {activities.length?<div className="daily-list">{activities.map((activity,index)=><label key={activity.id} className={`daily-item${activity.completed?" is-complete":""}`}><input type="checkbox" checked={Boolean(activity.completed)} disabled={saving===activity.id} onChange={event=>toggleActivity(activity,event.target.checked)}/><span className="custom-check" aria-hidden="true">{activity.completed?<Check size={15}/>:<span>{index+1}</span>}</span><span className="daily-item-text">{activity.title}</span>{saving===activity.id?<span className="item-meta">กำลังบันทึก</span>:activity.completed?<span className="item-meta done-meta">เสร็จแล้ว</span>:<Circle className="item-circle" size={17}/>}</label>)}</div>:<div className="empty-checklist"><p>{data?"ยังไม่มีกิจกรรมในบทเรียนนี้":"กำลังโหลดเช็กลิสต์…"}</p>{data&&<Link href="/courses" className="text-link">เปิดหลักสูตร <ArrowRight size={15}/></Link>}</div>}
-          {activities.length>0&&<div className="daily-footer"><span><Clock3 size={15}/> เป้าหมายวันนี้ {data?.settings?.daily_minutes??"—"} นาที</span><Link href={next?`/learn/${next.slug}`:"/courses"}>เปิดบทเรียน <ArrowRight size={15}/></Link></div>}
+          {activities.length>0&&<div className="daily-footer"><span>กิจกรรมส่วนตัวของบทเรียนนี้</span><Link href={next?`/learn/${next.slug}`:"/courses"}>เปิดบทเรียน <ArrowRight size={15}/></Link></div>}
         </section>
 
         <section className="panel course-panel" aria-labelledby="path-title">
@@ -86,7 +86,7 @@ export default function Dashboard() {
 
         <section className="panel performance-panel" aria-labelledby="performance-title"><div className="section-heading compact-heading"><div className="section-icon performance-icon"><Award size={18}/></div><div><p className="eyebrow">KEEP IT UP</p><h2 id="performance-title">ผลการฝึกล่าสุด</h2></div></div>{data?.recent.length?<div className="performance-list">{data.recent.map((attempt,index)=><div className="performance-row" key={`${attempt.created_at}-${index}`}><div className="performance-score"><b>{attempt.score}</b><span>/{attempt.total}</span></div><div className="performance-detail"><strong>{attempt.title}</strong><span>{new Date(`${attempt.created_at.replace(" ","T")}Z`).toLocaleDateString("th-TH",{day:"numeric",month:"short",timeZone:"Asia/Bangkok"})}</span></div><span className={`result-pill ${attempt.passed?"passed":"retry"}`}>{attempt.passed?"ผ่าน":"ฝึกต่อ"}</span></div>)}</div>:<div className="empty-performance"><Award size={24}/><p>ทำแบบทดสอบท้ายบทเพื่อดูพัฒนาการของคุณที่นี่</p></div>}<Link href="/review" className="panel-link">ทบทวนคำตอบ <ArrowRight size={15}/></Link></section>
 
-        <Link href="/learn/hangul-intro#tutor" className="tutor-shortcut"><span className="tutor-spark">✦</span><span><b>ถาม AI Tutor</b><small>{data?.aiReady?"พร้อมช่วยอธิบายบทเรียน":"ตั้งค่าผู้ให้บริการเพื่อเริ่มใช้"}</small></span><ArrowRight size={17}/></Link>
+        <Link href="/learn/hangul-intro#tutor" className="tutor-shortcut"><span className="tutor-spark">✦</span><span><b>ถาม AI Tutor</b><small>{data?.aiReady?"ตั้งค่าผู้ให้บริการไว้แล้ว":"AI Tutor ยังไม่เปิดใช้งาน — จะตั้งค่าภายหลัง"}</small></span><ArrowRight size={17}/></Link>
       </aside>
     </div>
   </div>;

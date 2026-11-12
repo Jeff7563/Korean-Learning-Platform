@@ -11,7 +11,6 @@ const PublicLessonSchema = z.object({
   examples: z.array(z.string()),
   activities: z.array(z.string()),
   vocabulary: z.array(z.object({ korean: z.string(), thai: z.string() })),
-  video: z.object({ id: z.string(), url: z.string(), creator: z.string(), title: z.string() }).optional(),
 });
 
 export type PublicLesson = z.infer<typeof PublicLessonSchema>;
