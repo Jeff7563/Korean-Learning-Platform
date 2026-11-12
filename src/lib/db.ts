@@ -4,4 +4,4 @@ import { mkdirSync } from "node:fs";
 import { dirname } from "node:path";
 import { getDatabasePath } from "@/lib/database-path";
 let singleton: Database.Database | undefined;
-export function db() { if (!singleton) { const file = getDatabasePath(); mkdirSync(dirname(file), { recursive: true }); singleton = new Database(file); singleton.pragma("foreign_keys = ON"); } return singleton; }
+export function db() { if (!singleton) { const file = getDatabasePath(process.env.KOREAN_DB_PATH); mkdirSync(dirname(file), { recursive: true }); singleton = new Database(file); singleton.pragma("foreign_keys = ON"); } return singleton; }
