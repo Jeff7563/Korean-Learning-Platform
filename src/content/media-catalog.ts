@@ -1,6 +1,6 @@
 export type LessonMediaResource = {
   id: string;
-  kind: "youtube" | "article";
+  kind: "youtube" | "video" | "article";
   title: string;
   creator: string;
   url: string;
@@ -41,16 +41,60 @@ const openHangul = (id: string, slug: string, title: string, summary: string): L
   verification: { ...checked, method: "ตรวจชื่อบทและเนื้อหาภาษาไทยบนหน้า OpenHangul โดยตรง" },
 });
 
-const everydayCourse = (id: string, title: string, summary: string): LessonMediaResource => ({
+const altvEpisode = (id: string, title: string, summary: string): LessonMediaResource => ({
   id,
-  kind: "article",
+  kind: "video",
   title,
-  creator: "K-MOOC / Thai MOOC",
-  url: "https://lms.thaimooc.org/courses/course-v1:K-MOOC+K-MOOC001+2020/about",
+  creator: "Thai PBS ALTV · Korean Pop Up · Jongbae Park",
+  url: `https://altv.thaipbs.or.th/programs/tutor-hub/${id}?type=episode`,
   language: "th",
   summary,
-  verification: { ...checked, method: "ตรวจหน้าหลักสูตรและหัวข้อรายสัปดาห์บน Thai MOOC โดยตรง" },
+  verification: { ...checked, method: "ตรวจชื่อ ตอน หัวข้อ และผู้ดำเนินรายการจากหน้า ALTV ต้นฉบับ; หน้าตอนมีวิดีโอรายการให้รับชม" },
 });
+
+const hrdThaiTextbook = (id: string, summary: string): LessonMediaResource => ({
+  id,
+  kind: "article",
+  title: "หนังสือภาษาเกาหลีมาตรฐานสำหรับ EPS-TOPIK เล่ม 1 (ฉบับภาษาไทย)",
+  creator: "HRD Korea",
+  url: "https://epstopik.hrdkorea.or.kr/epstopik/eps_klt/ebook_pdf/4.%20Thailand%201.pdf",
+  language: "th",
+  summary,
+  verification: { ...checked, method: "ตรวจสารบัญภาษาไทยและบทที่ตรงกับหัวข้อใน PDF ทางการของ HRD Korea; ไม่คัดลอกหรือดัดแปลงเนื้อหา" },
+});
+
+const thaiMoocSyllabus: LessonMediaResource = {
+  id: "kmooc-korean-beginner-1-syllabus",
+  kind: "article",
+  title: "ภาษาเกาหลีเบื้องต้น 1 — หน้าแนะนำและโครงสร้างรายวิชา",
+  creator: "K-MOOC · Thai MOOC",
+  url: "https://lms.thaimooc.org/courses/course-v1:K-MOOC+K-MOOC001+2020/about",
+  language: "th",
+  summary: "หน้าเว็บสาธารณะแสดงคำอธิบายและหัวข้อรายสัปดาห์ของหลักสูตร แต่ระบุว่าปิดการลงทะเบียนแล้ว จึงใช้ตรวจสอบขอบเขตหัวข้อเท่านั้น ไม่ใช่วิดีโอบทเรียนที่รับชมได้",
+  verification: { ...checked, method: "ตรวจชื่อ สถานะลงทะเบียน คำอธิบาย และกำหนดการรายสัปดาห์บนหน้า Thai MOOC โดยตรง" },
+};
+
+const sejongCurriculum: LessonMediaResource = {
+  id: "iksi-beginner-days-dates",
+  kind: "article",
+  title: "Online King Sejong Institute: Beginner Korean curriculum",
+  creator: "King Sejong Institute Foundation",
+  url: "https://www.iksi.or.kr/lms/main/curriculum.do",
+  language: "en",
+  summary: "หน้าหลักสูตรสาธารณะยืนยันหัวข้อระดับ Beginner และมีภาษาไทยเป็นภาษาสนับสนุน แต่เป็นหน้าหลักสูตร ไม่ใช่บทเรียนวิดีโอ; การเรียนรายวิชาอาจต้องสมัครหรือลงชื่อเข้าใช้",
+  verification: { ...checked, method: "ตรวจหน้าหลักสูตรและรายการภาษาที่รองรับจาก Online KSI โดยตรง" },
+};
+
+const epsTextbookListing: LessonMediaResource = {
+  id: "eps-new-textbook-1",
+  kind: "article",
+  title: "EPS-TOPIK NEW 한국어 표준교재 1 (일상생활 한국어)",
+  creator: "HRD Korea",
+  url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en",
+  language: "en",
+  summary: "รายการทางการระบุหนังสือฉบับปี 2024 และไฟล์เสียงประกอบ หนังสือและไฟล์เสียงมีเงื่อนไขสัญญาอนุญาตของเกาหลี (KOGL Type 3: ระบุที่มาและห้ามดัดแปลง); ลิงก์นี้เป็นหน้ารายการ ไม่ใช่ไฟล์บทเรียนโดยตรง",
+  verification: { ...checked, method: "ตรวจชื่อเอกสาร ไฟล์เสียง และประกาศ KOGL บนเว็บไซต์ EPS-TOPIK/HRD Korea โดยตรง" },
+};
 
 const hangulBasicsVideo = video(
   "hVnDpNqWwDc",
@@ -116,21 +160,25 @@ export const lessonMediaCatalog: Record<string, LessonMediaResource[]> = {
     hangulOverview,
     openHangul("openhangul-reading", "hangul-reading", "ฝึกอ่าน: ป้าย เมนู และชื่อ", "ทบทวนการอ่านคำจริงและการประกอบเสียงที่เรียนมา"),
   ],
-  "everyday-greetings": [everydayCourse("kmooc-greetings", "ภาษาเกาหลีเบื้องต้น 1: ทักทาย", "หัวข้อสัปดาห์ 1 ระบุ 인사하기 (การทักทาย) พร้อมสำนวนในสถานการณ์ประจำวัน")],
-  "everyday-introduction": [everydayCourse("kmooc-introduction", "ภาษาเกาหลีเบื้องต้น 1: แนะนำตัว", "หัวข้อสัปดาห์ 1 ระบุ 자기소개하기 (การแนะนำตัว) พร้อมบทสนทนาสำหรับผู้เริ่มต้น")],
-  "everyday-personal-information": [everydayCourse("kmooc-personal-info", "ภาษาเกาหลีเบื้องต้น 1: ข้อมูลส่วนตัว", "คอร์สครอบคลุมบทสนทนาแนะนำตัวและถามตอบข้อมูลพื้นฐาน")],
-  "everyday-objects-sentences": [everydayCourse("kmooc-objects", "ภาษาเกาหลีเบื้องต้น 1: สิ่งของและตำแหน่ง", "หัวข้อสัปดาห์ 2 ครอบคลุมการถามว่ามีสิ่งของหรือไม่และถามตำแหน่งสิ่งของ")],
-  "everyday-sino-korean-numbers": [everydayCourse("kmooc-sino-numbers", "ภาษาเกาหลีเบื้องต้น 1: ตัวเลขและราคา", "หัวข้อสัปดาห์ 4 ระบุการเรียนตัวเลข หน่วยนับ และการถามตอบราคา")],
-  "everyday-native-numbers-counters": [everydayCourse("kmooc-counters", "ภาษาเกาหลีเบื้องต้น 1: จำนวนและลักษณนาม", "หัวข้อสัปดาห์ 4 ครอบคลุมตัวเลขและหน่วยนับ; ใช้ประกอบการฝึกลักษณนามพื้นฐาน")],
+  "everyday-greetings": [altvEpisode("643507794568cccc2a1a67a8", "ทักทาย แนะนำตัว และบอกลา | Korean Pop Up", "ตอนภาษาไทยโดย Jongbae Park ฝึกคำทักทาย การแนะนำตัว และคำลา เหมาะกับบทเรียนทักทายและแนะนำตัว")],
+  "everyday-introduction": [altvEpisode("643507794568cccc2a1a67a8", "ทักทาย แนะนำตัว และบอกลา | Korean Pop Up", "ตอนภาษาไทยโดย Jongbae Park ฝึกการแนะนำตัวในบริบทสนทนาพื้นฐาน")],
+  "everyday-personal-information": [hrdThaiTextbook("hrd-thai-personal-info", "หนังสือภาษาไทย บท 6 (หน้า 66 เป็นต้นไป) ฝึกแนะนำชื่อ ประเทศ และอาชีพ; ใช้หมายเลขสมมติในแบบฝึกเพื่อรักษาความเป็นส่วนตัว")],
+  "everyday-objects-sentences": [altvEpisode("64bf8a28d889672674a17537", "สิ่งนั้นคืออะไร สิ่งนี้คืออะไร | Korean Pop Up", "ตอนภาษาไทยฝึกคำชี้สิ่งของและบทถามตอบสั้น ๆ; สำหรับไวยากรณ์การมีอยู่และตำแหน่งให้ใช้คำอธิบายในบทเรียนนี้ต่อ")],
+  "everyday-sino-korean-numbers": [hrdThaiTextbook("hrd-thai-sino-numbers", "หนังสือภาษาไทยมีตัวเลขและราคาในบท 8, 11 และ 13; ใช้คู่กับรายการเลข 0–20 และเสียงอ่านที่อธิบายในบทเรียนนี้")],
+  "everyday-native-numbers-counters": [hrdThaiTextbook("hrd-thai-counters", "หนังสือภาษาไทย บท 9 และ 11 มีแบบนับคน/สิ่งของและตัวอย่างการซื้อสินค้า; ใช้ทบทวนลักษณนามพื้นฐาน")],
   "everyday-days-dates-time": [
-    everydayCourse("kmooc-time", "ภาษาเกาหลีเบื้องต้น 1: เวลาและนัดหมาย", "หัวข้อสัปดาห์ 3 ครอบคลุมเวลาและการนัดหมาย; สำหรับการเรียงวันที่ ดูหัวข้อวันและวันที่ในหลักสูตรผู้เริ่มต้นของ Sejong"),
-    { id: "iksi-beginner-days-dates", kind: "article", title: "Online King Sejong Institute: Beginner Korean curriculum", creator: "King Sejong Institute Foundation", url: "https://www.iksi.or.kr/lms/main/curriculum.do", language: "en", summary: "หลักสูตรผู้เริ่มต้นระบุวันในสัปดาห์และวันที่เป็นหัวข้อสื่อสารประจำวัน", verification: { ...checked, method: "ตรวจคำอธิบายหลักสูตรผู้เริ่มต้นบนเว็บไซต์ Online KSI โดยตรง" } },
+    hrdThaiTextbook("hrd-thai-dates-time", "หนังสือภาษาไทย บท 8, 10 และ 13 ครอบคลุมเวลา วัน/วันที่ และการนัดหมาย"),
+    sejongCurriculum,
   ],
-  "everyday-places-locations": [everydayCourse("kmooc-places", "ภาษาเกาหลีเบื้องต้น 1: สถานที่", "หัวข้อสัปดาห์ 2 ครอบคลุมการถามตำแหน่งและการถามว่าจะไปที่ไหน")],
-  "everyday-shopping-food-prices": [everydayCourse("kmooc-shopping", "ภาษาเกาหลีเบื้องต้น 1: ซื้อของและอาหาร", "หัวข้อสัปดาห์ 4 ครอบคลุมการถามราคาและซื้อของ; สัปดาห์ 5 ครอบคลุมอาหารและการสั่งอาหาร")],
+  "everyday-places-locations": [hrdThaiTextbook("hrd-thai-places", "หนังสือภาษาไทย บท 7 และ 12 ฝึกถามสถานที่ สิ่งของ ตำแหน่ง และเส้นทาง" )],
+  "everyday-shopping-food-prices": [
+    altvEpisode("64a518dc857c074886f54eb0", "การสั่งอาหารในภาษาเกาหลี | Korean Pop Up", "ตอนภาษาไทยโดย Jongbae Park สอนคำศัพท์และประโยคสั่งอาหาร; การถามราคาและลักษณนามให้ฝึกจากคำอธิบายในบทเรียนนี้"),
+    hrdThaiTextbook("hrd-thai-shopping-food", "หนังสือภาษาไทย บท 11 และ 14 ครอบคลุมการซื้อสินค้า ราคา จำนวน และการสั่งอาหาร"),
+  ],
   "everyday-review": [
-    everydayCourse("kmooc-everyday-review", "ภาษาเกาหลีเบื้องต้น 1: บทสนทนาในชีวิตประจำวัน", "คอร์สระดับต้นรวมหัวข้อแนะนำตัว สิ่งของ สถานที่ เวลา ราคา และอาหาร"),
-    { id: "eps-new-textbook-1", kind: "article", title: "EPS-TOPIK NEW Standard Korean Textbook 1 (Everyday Korean)", creator: "HRD Korea", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", language: "en", summary: "หน้ารวมเอกสารทางการระบุหนังสือฉบับปรับปรุง เล่ม 1 สำหรับภาษาเกาหลีในชีวิตประจำวัน; ใช้เป็นแหล่งเรียนเสริมโดยไม่คัดลอกเนื้อหา", verification: { ...checked, method: "ตรวจชื่อและคำอธิบายหนังสือบนเว็บไซต์ EPS-TOPIK/HRD Korea โดยตรง" } },
+    thaiMoocSyllabus,
+    epsTextbookListing,
+    hrdThaiTextbook("hrd-thai-review", "หนังสือภาษาไทยฉบับเดิมเป็นแหล่งฝึกเสริม มีบทสนทนาในชีวิตประจำวันและแบบฝึกฟัง; เป็นเนื้อหาสำหรับบริบทแรงงาน จึงไม่แทนหลักสูตรผู้เริ่มต้นทั่วไป"),
   ],
 };
 

@@ -21,6 +21,7 @@ async function passLesson(request: APIRequestContext, lesson: (typeof curriculum
 }
 
 test("Everyday Korean unlocks after Hangul and completes as a second module", async ({ page, request }) => {
+  test.setTimeout(90_000);
   mkdirSync(screenshots, { recursive: true });
   page.setDefaultTimeout(12_000);
 
@@ -58,8 +59,13 @@ test("Everyday Korean unlocks after Hangul and completes as a second module", as
   await expect(page.getByRole("heading", { name: "ทักทายและใช้คำสุภาพ" })).toBeVisible();
   await expect(page.locator(".player-phase")).toContainText("Everyday Korean");
   await expect(page.locator("#video .media-fallback")).toContainText("ทักทาย");
-  await expect(page.locator("#video .media-attribution")).toContainText("K-MOOC / Thai MOOC");
+  await expect(page.locator("#video .media-fallback")).toContainText("วิดีโอจากแหล่งภายนอก");
+  await expect(page.locator("#video .media-attribution")).toContainText("Thai PBS ALTV");
+  await expect(page.locator("#video .media-attribution a")).toHaveAttribute("href", "https://altv.thaipbs.or.th/programs/tutor-hub/643507794568cccc2a1a67a8?type=episode");
   await expect(page.locator("#listening .listening-item")).toHaveCount(3);
+  for (const anchor of ["video", "listening", "vocabulary", "lesson-activities", "checkpoint"]) {
+    await expect(page.locator(`#${anchor}`)).toHaveCount(1);
+  }
   await expect(page.getByRole("link", { name: "บทก่อนหน้า: ทบทวนพื้นฐานฮันกึล" })).toHaveAttribute("href", "/learn/hangul-review");
   await page.setViewportSize({ width: 1440, height: 980 });
   await page.screenshot({ path: resolve(screenshots, "everyday-lesson-desktop.png"), fullPage: true });
@@ -77,6 +83,11 @@ test("Everyday Korean unlocks after Hangul and completes as a second module", as
   expect(complete).toMatchObject({ completed: 20, total: 20, percent: 100 });
   expect(complete.modules[1]).toMatchObject({ completed: 10, total: 10, percent: 100 });
   expect(complete.next.slug).toBe("everyday-review");
+
+  await page.goto("/learn/everyday-sino-korean-numbers");
+  await expect(page.getByRole("heading", { name: "ตัวเลขเกาหลีจีน" })).toBeVisible();
+  await expect(page.locator("#video .media-fallback")).toContainText("เอกสารและแหล่งเรียนรู้ภายนอก");
+  await expect(page.locator("#video .media-attribution a")).toHaveAttribute("href", "https://epstopik.hrdkorea.or.kr/epstopik/eps_klt/ebook_pdf/4.%20Thailand%201.pdf");
 
   await page.goto("/dashboard");
   await expect(page.getByRole("region", { name: "ความคืบหน้า Everyday Korean" })).toContainText("10/10");

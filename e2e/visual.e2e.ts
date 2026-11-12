@@ -28,10 +28,10 @@ test("dashboard and lesson player fit desktop and mobile", async ({ page }) => {
   await expect(page.locator(".media-attribution a")).toHaveAttribute("href", "https://www.youtube.com/watch?v=hVnDpNqWwDc");
   await expect(page.getByText(/เบราว์เซอร์นี้ยังไม่มีเสียงภาษาเกาหลีพร้อมใช้/)).toBeVisible();
   await expect(page.getByRole("button", { name: /ฟังเสียงสังเคราะห์/ }).first()).toBeDisabled();
-  const articleResource = page.getByRole("button", { name: /บทเรียนออนไลน์.*สระพื้นฐาน I/ });
+  const articleResource = page.getByRole("button", { name: /เอกสาร\/แหล่งข้อมูล.*สระพื้นฐาน I/ });
   await articleResource.click();
-  await expect(page.getByText("แหล่งเรียนรู้ภายนอก")).toBeVisible();
-  await expect(page.getByRole("link", { name: /เปิดบทเรียนต้นฉบับ/ })).toHaveAttribute("href", "https://hangul.openblog.com/th/lesson/hangul-vowels-1");
+  await expect(page.getByText("เอกสารและแหล่งเรียนรู้ภายนอก")).toBeVisible();
+  await expect(page.getByRole("link", { name: /เปิดเอกสารต้นฉบับ/ })).toHaveAttribute("href", "https://hangul.openblog.com/th/lesson/hangul-vowels-1");
   await page.getByRole("button", { name: /วิดีโอ.*KHEM KOREA/ }).click();
   await expect(page.getByRole("heading", { name: "แบบทดสอบท้ายบท" })).toBeVisible();
   const videoRatio = await page.locator(".media-frame").evaluate((element) => { const rect = element.getBoundingClientRect(); return rect.width / rect.height; });

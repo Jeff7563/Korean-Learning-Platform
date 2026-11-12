@@ -30,7 +30,7 @@ export function LessonMedia({ resources }: { resources: LessonMediaResource[] })
       </div>
       {selected ? (
         <>
-          <div className={`media-frame${selected.kind === "article" ? " media-external" : ""}`}>
+          <div className={`media-frame${selected.kind !== "youtube" ? " media-external" : ""}`}>
             {selected.kind === "youtube" && !embedFailed ? (
               <iframe
                 key={selected.id}
@@ -45,10 +45,10 @@ export function LessonMedia({ resources }: { resources: LessonMediaResource[] })
             ) : (
               <div className="media-fallback" role="status">
                 {selected.kind === "article" ? <BookOpenText size={32} /> : <CirclePlay size={32} />}
-                <strong>{selected.kind === "article" ? "แหล่งเรียนรู้ภายนอก" : "วิดีโอเล่นในหน้านี้ไม่ได้"}</strong>
+                <strong>{selected.kind === "video" ? "วิดีโอจากแหล่งภายนอก" : selected.kind === "article" ? "เอกสารและแหล่งเรียนรู้ภายนอก" : "วิดีโอเล่นในหน้านี้ไม่ได้"}</strong>
                 <span>{selected.summary}</span>
                 <a href={selected.url} target="_blank" rel="noreferrer">
-                  {selected.kind === "article" ? "เปิดบทเรียนต้นฉบับ" : "เปิดวิดีโอต้นฉบับบน YouTube"} <ArrowUpRight size={16} />
+                  {selected.kind === "video" ? "เปิดวิดีโอต้นฉบับบน Thai PBS ALTV" : selected.kind === "article" ? "เปิดเอกสารต้นฉบับ" : "เปิดวิดีโอต้นฉบับบน YouTube"} <ArrowUpRight size={16} />
                 </a>
               </div>
             )}
@@ -59,11 +59,11 @@ export function LessonMedia({ resources }: { resources: LessonMediaResource[] })
               <span>โดย {selected.creator} · {selected.language === "th" ? "ภาษาไทย" : "ภาษาอังกฤษ"} · ตรวจสอบ {selected.verification.checkedAt}</span>
             </div>
             <a href={selected.url} target="_blank" rel="noreferrer" aria-label={`เปิดแหล่งต้นฉบับ: ${selected.title}`}>
-              {selected.kind === "youtube" ? "วิดีโอไม่เล่น? เปิดต้นฉบับ" : "เปิดต้นฉบับ"} <ExternalLink size={15} />
+              {selected.kind === "youtube" ? "วิดีโอไม่เล่น? เปิดต้นฉบับ" : selected.kind === "video" ? "เปิดวิดีโอต้นฉบับบน ALTV" : "เปิดเอกสารต้นฉบับ"} <ExternalLink size={15} />
             </a>
           </div>
           {resources.length > 1 && (
-            <div className="media-resource-list" role="group" aria-label="เลือกวิดีโอหรือแหล่งเรียนรู้">
+            <div className="media-resource-list" role="group" aria-label="เลือกวิดีโอ เอกสาร หรือแหล่งเรียนรู้">
               {resources.map((resource) => (
                 <button
                   key={resource.id}
@@ -72,7 +72,7 @@ export function LessonMedia({ resources }: { resources: LessonMediaResource[] })
                   aria-pressed={selected.id === resource.id}
                   onClick={() => selectResource(resource.id)}
                 >
-                  <span className="media-option-type">{resource.kind === "youtube" ? "วิดีโอ" : "บทเรียนออนไลน์"}</span>
+                  <span className="media-option-type">{resource.kind === "article" ? "เอกสาร/แหล่งข้อมูล" : "วิดีโอ"}</span>
                   <strong>{resource.title}</strong>
                   <span>{resource.creator}</span>
                 </button>
