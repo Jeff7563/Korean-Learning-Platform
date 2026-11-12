@@ -8,7 +8,9 @@ function createDb() {
   const database = new Database(":memory:");
   database.pragma("foreign_keys = ON");
   database.exec(`
-    CREATE TABLE lessons(id INTEGER PRIMARY KEY,slug TEXT,title TEXT,position INTEGER);
+    CREATE TABLE courses(id INTEGER PRIMARY KEY,slug TEXT,title TEXT);
+    CREATE TABLE modules(id INTEGER PRIMARY KEY,course_id INTEGER,slug TEXT,title TEXT,position INTEGER);
+    CREATE TABLE lessons(id INTEGER PRIMARY KEY,slug TEXT,title TEXT,position INTEGER,module_id INTEGER DEFAULT 1);
     CREATE TABLE learner_lesson_progress(lesson_id INTEGER PRIMARY KEY,status TEXT);
     CREATE TABLE learner_activity_progress(id INTEGER PRIMARY KEY,activity_id INTEGER UNIQUE,completed_at TEXT DEFAULT CURRENT_TIMESTAMP);
     CREATE TABLE lesson_activities(id INTEGER PRIMARY KEY,lesson_id INTEGER,slug TEXT,title TEXT,position INTEGER);
@@ -16,7 +18,8 @@ function createDb() {
     CREATE TABLE exercises(id INTEGER PRIMARY KEY,lesson_id INTEGER,position INTEGER,prompt TEXT,explanation TEXT);
     CREATE TABLE checkpoint_answers(id INTEGER PRIMARY KEY,attempt_id INTEGER,exercise_id INTEGER,correct INTEGER);
   `);
-  database.prepare("INSERT INTO lessons VALUES(1,'lesson-one','Lesson One',1),(2,'lesson-two','Lesson Two',2)").run();
+  database.exec("INSERT INTO courses VALUES(1,'course','Course'); INSERT INTO modules VALUES(1,1,'module-one','Module One',1);");
+  database.prepare("INSERT INTO lessons(id,slug,title,position,module_id) VALUES(1,'lesson-one','Lesson One',1,1),(2,'lesson-two','Lesson Two',2,1)").run();
   database.prepare("INSERT INTO lesson_activities(id,lesson_id,slug,title,position) VALUES(1,1,'activity-1','Write a word',1),(2,2,'activity-1','Read a word',1)").run();
   return database;
 }
@@ -75,7 +78,7 @@ describe("progress-aware recommendations", () => {
   });
   it("does not treat a failed retake of an already-passed lesson as the current recommendation", () => {
     const database = createDb();
-    database.prepare("INSERT INTO lessons VALUES(3,'lesson-three','Lesson Three',3)").run();
+    database.prepare("INSERT INTO lessons(id,slug,title,position,module_id) VALUES(3,'lesson-three','Lesson Three',3,1)").run();
     database.prepare("INSERT INTO checkpoint_attempts(id,lesson_id,score,total,passed) VALUES(1,1,5,5,1),(2,1,0,5,0)").run();
     expect(recommendStudy(database)).toMatchObject({ lesson: { slug: "lesson-two" }, href: "/learn/lesson-two#lesson-activities" });
     database.close();

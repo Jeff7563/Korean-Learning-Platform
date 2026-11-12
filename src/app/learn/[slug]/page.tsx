@@ -5,15 +5,16 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { ArrowLeft, ArrowRight, Check, CheckCircle2, ChevronDown, ChevronUp, LoaderCircle, LockKeyhole, MessageCircle, Send, Sparkles } from "lucide-react";
 import { listeningItemsByLesson } from "@/content/media-catalog";
+import { everydayListeningItems } from "@/content/everyday-listening";
 import type { LessonMediaResource } from "@/content/media-catalog";
 import { LessonMedia } from "@/components/lesson-media";
 import { ListeningPractice } from "@/components/listening-practice";
 
-type Lesson = { slug: string; title: string; description: string; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; videoResources: LessonMediaResource[] };
+type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
 type Exercise = { id: number; prompt: string; options: string[] };
 type Activity = { id: number; title: string; completed: number };
 type Attempt = { score: number; total: number; passed: number; created_at: string };
-type CourseLesson = { slug: string; title: string; position: number; status: "locked" | "available" | "in_progress" | "completed" };
+type CourseLesson = { slug: string; title: string; position: number; moduleTitle: string; modulePosition: number; status: "locked" | "available" | "in_progress" | "completed" };
 type PageData = { lesson: Lesson; exercises: Exercise[]; activities: Activity[]; attempts: Attempt[] };
 type Outcome = { score: number; total: number; passed: boolean; recommendation: string; feedback: Array<{ exerciseId: number; correct: boolean; explanation: string }> };
 
@@ -123,12 +124,12 @@ export default function Learn() {
   const previous = currentIndex > 0 ? course[currentIndex - 1] : undefined;
   const next = currentIndex >= 0 ? course[currentIndex + 1] : undefined;
   const completeCount = data.activities.filter((activity) => activity.completed).length;
-  const listeningItems = listeningItemsByLesson[slug] ?? lesson.vocabulary;
+  const listeningItems = listeningItemsByLesson[slug] ?? everydayListeningItems[slug] ?? lesson.vocabulary;
 
   return <div className="shell lesson-player">
     <header className="player-header">
       <Link href="/courses" className="back-to-course"><ArrowLeft size={17} /> กลับหลักสูตร</Link>
-      <div className="player-title"><span className="player-phase">KOREAN FOUNDATIONS · บทที่ {currentIndex >= 0 ? currentIndex + 1 : "—"}</span><h1>{lesson.title}</h1><p>{lesson.description}</p></div>
+      <div className="player-title"><span className="player-phase">{lesson.module.title} · โมดูล {lesson.module.position} · บทที่ {lesson.position}</span><h1>{lesson.title}</h1><p>{lesson.description}</p></div>
       <nav className="lesson-nav" aria-label="นำทางบทเรียน">
         <Link href={previous ? `/learn/${previous.slug}` : "/courses"} aria-label={previous ? `บทก่อนหน้า: ${previous.title}` : "กลับหลักสูตร"} className="lesson-nav-button"><ArrowLeft size={17} /><span>ก่อนหน้า</span></Link>
         {next?.status !== "locked" && next ? <Link href={`/learn/${next.slug}`} className="lesson-nav-button">ถัดไป <ArrowRight size={17} /></Link> : <span className="lesson-nav-button nav-disabled" aria-disabled="true"><LockKeyhole size={15} /> ถัดไป</span>}

@@ -41,6 +41,17 @@ const openHangul = (id: string, slug: string, title: string, summary: string): L
   verification: { ...checked, method: "ตรวจชื่อบทและเนื้อหาภาษาไทยบนหน้า OpenHangul โดยตรง" },
 });
 
+const everydayCourse = (id: string, title: string, summary: string): LessonMediaResource => ({
+  id,
+  kind: "article",
+  title,
+  creator: "K-MOOC / Thai MOOC",
+  url: "https://lms.thaimooc.org/courses/course-v1:K-MOOC+K-MOOC001+2020/about",
+  language: "th",
+  summary,
+  verification: { ...checked, method: "ตรวจหน้าหลักสูตรและหัวข้อรายสัปดาห์บน Thai MOOC โดยตรง" },
+});
+
 const hangulBasicsVideo = video(
   "hVnDpNqWwDc",
   "ภาษาเกาหลี พื้นฐาน 1 : สระ พยัญชนะ ตัวสะกด สำหรับผู้เริ่มต้น 💖 คลิปเดียวอ่านเกาหลีได้!🔥",
@@ -104,6 +115,22 @@ export const lessonMediaCatalog: Record<string, LessonMediaResource[]> = {
     hangulBasicsVideo,
     hangulOverview,
     openHangul("openhangul-reading", "hangul-reading", "ฝึกอ่าน: ป้าย เมนู และชื่อ", "ทบทวนการอ่านคำจริงและการประกอบเสียงที่เรียนมา"),
+  ],
+  "everyday-greetings": [everydayCourse("kmooc-greetings", "ภาษาเกาหลีเบื้องต้น 1: ทักทาย", "หัวข้อสัปดาห์ 1 ระบุ 인사하기 (การทักทาย) พร้อมสำนวนในสถานการณ์ประจำวัน")],
+  "everyday-introduction": [everydayCourse("kmooc-introduction", "ภาษาเกาหลีเบื้องต้น 1: แนะนำตัว", "หัวข้อสัปดาห์ 1 ระบุ 자기소개하기 (การแนะนำตัว) พร้อมบทสนทนาสำหรับผู้เริ่มต้น")],
+  "everyday-personal-information": [everydayCourse("kmooc-personal-info", "ภาษาเกาหลีเบื้องต้น 1: ข้อมูลส่วนตัว", "คอร์สครอบคลุมบทสนทนาแนะนำตัวและถามตอบข้อมูลพื้นฐาน")],
+  "everyday-objects-sentences": [everydayCourse("kmooc-objects", "ภาษาเกาหลีเบื้องต้น 1: สิ่งของและตำแหน่ง", "หัวข้อสัปดาห์ 2 ครอบคลุมการถามว่ามีสิ่งของหรือไม่และถามตำแหน่งสิ่งของ")],
+  "everyday-sino-korean-numbers": [everydayCourse("kmooc-sino-numbers", "ภาษาเกาหลีเบื้องต้น 1: ตัวเลขและราคา", "หัวข้อสัปดาห์ 4 ระบุการเรียนตัวเลข หน่วยนับ และการถามตอบราคา")],
+  "everyday-native-numbers-counters": [everydayCourse("kmooc-counters", "ภาษาเกาหลีเบื้องต้น 1: จำนวนและลักษณนาม", "หัวข้อสัปดาห์ 4 ครอบคลุมตัวเลขและหน่วยนับ; ใช้ประกอบการฝึกลักษณนามพื้นฐาน")],
+  "everyday-days-dates-time": [
+    everydayCourse("kmooc-time", "ภาษาเกาหลีเบื้องต้น 1: เวลาและนัดหมาย", "หัวข้อสัปดาห์ 3 ครอบคลุมเวลาและการนัดหมาย; สำหรับการเรียงวันที่ ดูหัวข้อวันและวันที่ในหลักสูตรผู้เริ่มต้นของ Sejong"),
+    { id: "iksi-beginner-days-dates", kind: "article", title: "Online King Sejong Institute: Beginner Korean curriculum", creator: "King Sejong Institute Foundation", url: "https://www.iksi.or.kr/lms/main/curriculum.do", language: "en", summary: "หลักสูตรผู้เริ่มต้นระบุวันในสัปดาห์และวันที่เป็นหัวข้อสื่อสารประจำวัน", verification: { ...checked, method: "ตรวจคำอธิบายหลักสูตรผู้เริ่มต้นบนเว็บไซต์ Online KSI โดยตรง" } },
+  ],
+  "everyday-places-locations": [everydayCourse("kmooc-places", "ภาษาเกาหลีเบื้องต้น 1: สถานที่", "หัวข้อสัปดาห์ 2 ครอบคลุมการถามตำแหน่งและการถามว่าจะไปที่ไหน")],
+  "everyday-shopping-food-prices": [everydayCourse("kmooc-shopping", "ภาษาเกาหลีเบื้องต้น 1: ซื้อของและอาหาร", "หัวข้อสัปดาห์ 4 ครอบคลุมการถามราคาและซื้อของ; สัปดาห์ 5 ครอบคลุมอาหารและการสั่งอาหาร")],
+  "everyday-review": [
+    everydayCourse("kmooc-everyday-review", "ภาษาเกาหลีเบื้องต้น 1: บทสนทนาในชีวิตประจำวัน", "คอร์สระดับต้นรวมหัวข้อแนะนำตัว สิ่งของ สถานที่ เวลา ราคา และอาหาร"),
+    { id: "eps-new-textbook-1", kind: "article", title: "EPS-TOPIK NEW Standard Korean Textbook 1 (Everyday Korean)", creator: "HRD Korea", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", language: "en", summary: "หน้ารวมเอกสารทางการระบุหนังสือฉบับปรับปรุง เล่ม 1 สำหรับภาษาเกาหลีในชีวิตประจำวัน; ใช้เป็นแหล่งเรียนเสริมโดยไม่คัดลอกเนื้อหา", verification: { ...checked, method: "ตรวจชื่อและคำอธิบายหนังสือบนเว็บไซต์ EPS-TOPIK/HRD Korea โดยตรง" } },
   ],
 };
 

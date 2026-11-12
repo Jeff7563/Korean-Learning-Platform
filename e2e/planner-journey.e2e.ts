@@ -119,7 +119,7 @@ test("daily planner navigation, task persistence, and responsive learning flow",
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/courses");
   await expect(page.locator("main h1, .shell h1").first()).toBeVisible();
-  await expect(page.locator(".shell section.card").first().locator(".grid > a.card")).toHaveCount(10);
+  await expect(page.locator(".course-module").first().locator(".course-lesson-card")).toHaveCount(10);
   await page.goto(`/learn/${plan.lesson.slug}`);
   for (const anchor of ["video", "listening", "vocabulary", "lesson-activities", "checkpoint"]) {
     await expect(page.locator(`#${anchor}`)).toBeVisible();

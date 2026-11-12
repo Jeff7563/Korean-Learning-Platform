@@ -1,4 +1,6 @@
 export type Question = { prompt: string; options: string[]; answer: number; explanation: string };
+import { everydayKoreanLessons } from "./everyday-korean";
+
 export type Lesson = { slug: string; title: string; description: string; objectives: string[]; explanation: string; examples: string[]; activities: string[]; questions: Question[]; vocabulary: { korean: string; thai: string }[]; video?: { id: string; url: string; creator: string; title: string } };
 const q = (prompt: string, options: string[], answer: number, explanation: string): Question => ({ prompt, options, answer, explanation });
 export const lessons: Lesson[] = [
@@ -13,5 +15,9 @@ export const lessons: Lesson[] = [
 {slug:"reading-practice",title:"ฝึกอ่านคำพื้นฐาน",description:"รวมสระ พยัญชนะ และตัวสะกดในคำสั้น",objectives:["แยกคำเป็นบล็อกพยางค์","อ่านคำพื้นฐานโดยสังเกตตัวสะกด"],explanation:"เริ่มอ่านจากการแยกบล็อกและหาตัวอักษร ไม่จำเป็นต้องเร็ว คำว่า 나무 มี 나 + 무 ส่วน 사람 มี 사 + 람 เมื่อมีตัวสะกด ให้ดูตำแหน่งท้ายก่อนแล้วฟังรูปเสียงจริง การสะกดช่วยให้เห็นโครงสร้างแม้เสียงพูดอาจเปลี่ยนตามกฎ",examples:["나무 = 나 + 무 (ต้นไม้)","사람 = 사 + 람 (คน)","학교 = 학 + 교 (โรงเรียน)"],activities:["แบ่ง 나무, 사람, 학교 เป็นบล็อก","เขียนคำที่จำได้สามคำ","อ่านช้า ๆ โดยสังเกตตัวสะกด"],questions:[q("나무 มีกี่บล็อก?",["1","2","3"],1,"나무 แบ่งเป็น 나 และ 무"),q("คำว่า 사람 หมายถึงอะไร?",["คน","หนังสือ","โรงเรียน"],0,"사람 แปลว่าคน"),q("학교 แบ่งบล็อกอย่างไร?",["학 + 교","하 + ㄱ교","학ㄱ + 요"],0,"학교 มีสองบล็อก คือ 학 และ 교"),q("เมื่ออ่านคำมีตัวสะกดควรทำอย่างไร?",["มองข้ามตัวสะกด","สังเกตตัวสะกดและฟังคำเต็ม","เติมสระท้าย"],1,"ดูตัวสะกดควบคู่การฟังเสียงคำเต็ม"),q("나무 หมายถึงอะไร?",["ต้นไม้","คน","ใช่"],0,"나무 แปลว่าต้นไม้")],vocabulary:[{korean:"나무",thai:"ต้นไม้"},{korean:"사람",thai:"คน"},{korean:"학교",thai:"โรงเรียน"}]},
 {slug:"hangul-review",title:"ทบทวนพื้นฐานฮันกึล",description:"ทบทวนตัวอักษร บล็อกพยางค์ และตัวสะกด",objectives:["ประกอบบล็อกพยางค์พื้นฐานได้","ตรวจความเข้าใจฮันกึลก่อนเข้าสู่บทถัดไป"],explanation:"ทบทวนแนวคิดสำคัญ: ตัวอักษรพยัญชนะและสระประกอบเป็นบล็อกพยางค์ สระแนวตั้งวางข้างพยัญชนะ สระแนวนอนวางใต้พยัญชนะ และตัวสะกดอยู่ด้านล่าง คำอ่านไทยเป็นเพียงเสียงใกล้เคียง ควรฝึกฟังและอ่านอักษรเกาหลีโดยตรง บทถัดไปในระยะเริ่มต้นจะเน้นคำและวลีใช้ในชีวิตประจำวัน",examples:["한글 = ระบบอักษรเกาหลี","한 = ㅎ + ㅏ + ㄴ","사람 = 사 + 람"],activities:["ทบทวนสระและพยัญชนะที่จำได้","อ่าน 한글, 사람, 학교","จดสิ่งที่ยังต้องฝึกก่อนเริ่มบทต่อไป"],questions:[q("บล็อกพยางค์ทั่วไปเริ่มด้วยอะไร?",["สระอย่างเดียวเสมอ","พยัญชนะต้นและสระ","ตัวสะกด"],1,"บล็อกทั่วไปประกอบด้วยพยัญชนะต้นและสระ"),q("สระแนวตั้งวางตรงไหน?",["ด้านขวาของพยัญชนะ","ด้านล่าง","นอกบล็อก"],0,"สระแนวตั้งวางด้านขวา"),q("ตัวสะกดวางที่ใด?",["ด้านบน","ด้านล่าง","ด้านซ้ายเสมอ"],1,"ตัวสะกดอยู่ด้านล่างของบล็อก"),q("사람 มีความหมายว่าอะไร?",["คน","ต้นไม้","ภูเขา"],0,"사람 หมายถึงคน"),q("คำอ่านไทยช่วยเรียนเสียงเกาหลีอย่างไร?",["แทนเสียงจริงได้สมบูรณ์","ช่วยคร่าว ๆ แต่ไม่ตรงทุกเสียง","เป็นระบบสะกดทางการ"],1,"คำอ่านไทยเป็นเพียงตัวช่วยโดยประมาณ")],vocabulary:[{korean:"한글",thai:"อักษรเกาหลี"},{korean:"사람",thai:"คน"},{korean:"학교",thai:"โรงเรียน"}]}
 ];
-export const phases = ["Hangul Foundation","Everyday Korean","Korean Grammar","Workplace Korean","EPS-TOPIK Preparation"];
-export const schedule = ["บทเรียนใหม่","อ่านและฝึกออกเสียง","บทเรียนใหม่","ฝึกเขียน","ฟังและพูด","ทบทวนและแบบทดสอบ","พักหรือดูสื่อเกาหลีตามสมัครใจ"];
+export const curriculumModules = [
+  { slug: "hangul-foundation", title: "Hangul Foundation", position: 1, lessons },
+  { slug: "everyday-korean", title: "Everyday Korean", position: 2, lessons: everydayKoreanLessons },
+] as const;
+
+export const phases = curriculumModules.map((module) => module.title);

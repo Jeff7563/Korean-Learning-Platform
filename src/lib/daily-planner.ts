@@ -42,17 +42,22 @@ export function scheduledTasks(mode: StudyMode, lessonSlug?: string): PlannerTas
   ];
 }
 
-type LessonRow = { id: number; slug: string; title: string; position: number; passed: number; active: number };
+type LessonRow = { id: number; slug: string; title: string; position: number; modulePosition: number; passed: number; active: number };
 type Recommendation = { lesson: LessonRow | null; reason: string; href: string };
 
 export function recommendStudy(database: Database.Database): Recommendation {
-  const lessons = database.prepare(`SELECT l.id,l.slug,l.title,l.position,
+  const lessons = database.prepare(`SELECT l.id,l.slug,l.title,l.position,m.position modulePosition,
     EXISTS(SELECT 1 FROM checkpoint_attempts a WHERE a.lesson_id=l.id AND a.passed=1) passed,
     (EXISTS(SELECT 1 FROM learner_activity_progress p JOIN lesson_activities x ON x.id=p.activity_id WHERE x.lesson_id=l.id)
       OR EXISTS(SELECT 1 FROM learner_lesson_progress p WHERE p.lesson_id=l.id AND p.status='in_progress')) active
-    FROM lessons l ORDER BY l.position`).all() as LessonRow[];
+    FROM lessons l JOIN modules m ON m.id=l.module_id ORDER BY m.course_id,m.position,l.position,l.id`).all() as LessonRow[];
   if (!lessons.length) return { lesson: null, reason: "ยังไม่มีบทเรียนในหลักสูตร", href: "/courses" };
-  const states = lessons.map((lesson, index) => ({ ...lesson, locked: index > 0 && !lessons[index - 1].passed }));
+  let prerequisitesPassed = true;
+  const states = lessons.map((lesson) => {
+    const locked = !prerequisitesPassed;
+    prerequisitesPassed = prerequisitesPassed && Boolean(lesson.passed);
+    return { ...lesson, locked };
+  });
   const target = states.find((lesson) => !lesson.passed && !lesson.locked) ?? states.at(-1)!;
   const latest = database.prepare(`SELECT a.id,a.passed,l.id lessonId,l.slug,l.title FROM checkpoint_attempts a JOIN lessons l ON l.id=a.lesson_id ORDER BY a.id DESC LIMIT 1`).get() as { id: number; passed: number; lessonId: number; slug: string; title: string } | undefined;
   const latestLesson = latest ? states.find((lesson) => lesson.id === latest.lessonId) : undefined;

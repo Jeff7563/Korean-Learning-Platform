@@ -1,2 +1,50 @@
-"use client";import Link from "next/link";import {useEffect,useState} from "react";import {Lock,CheckCircle2,PlayCircle,BookOpen} from "lucide-react";import {phases} from "@/content/curriculum";
-type L={id:number;slug:string;title:string;description:string;position:number;status:"locked"|"available"|"in_progress"|"completed";passed:boolean};export default function Courses(){const [ls,setLs]=useState<L[]>([]);useEffect(()=>{fetch("/api/courses").then(r=>r.json()).then(d=>setLs(d.lessons??[]))},[]);return <div className="shell"><p className="muted">เส้นทางการเรียน</p><h1>หลักสูตรภาษาเกาหลี</h1><p className="muted">ห้าระยะการเรียน · เนื้อหาที่พร้อมเรียนจะระบุสถานะชัดเจน</p>{phases.map((phase,index)=><section key={phase} className="card" style={{marginTop:18,opacity:index?0.72:1}}><div style={{display:"flex",alignItems:"center",gap:12}}><span className="badge">ระยะ {index+1}</span><h2 style={{margin:"4px 0"}}>{phase}</h2>{index>0&&<span className="badge">วางแผนไว้ · ยังไม่มีเนื้อหา</span>}</div>{index===0?<div className="grid" style={{gridTemplateColumns:"repeat(auto-fit,minmax(250px,1fr))",marginTop:16}}>{ls.map(l=><Link key={l.id} href={l.status==="locked"?"#":`/learn/${l.slug}`} onClick={e=>l.status==="locked"&&e.preventDefault()} className="card" style={{padding:18,opacity:l.status==="locked"?.6:1,cursor:l.status==="locked"?"not-allowed":"pointer"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}><span className="badge">บท {l.position}</span>{l.status==="locked"?<Lock size={17}/>:l.status==="completed"?<CheckCircle2 size={18} color="#087f78"/>:<PlayCircle size={18} color="#087f78"/>}</div><h3>{l.title}</h3><p className="muted" style={{fontSize:14}}>{l.description}</p><span className="muted" style={{fontSize:12}}>{l.status==="locked"?"ล็อก · ผ่านบทก่อนหน้าเพื่อปลดล็อก":l.status==="completed"?"ผ่านแล้ว · เปิดทบทวนได้":l.status==="in_progress"?"กำลังเรียน":"พร้อมเรียน"}</span></Link>)}</div>:<p className="muted" style={{marginBottom:0}}><BookOpen size={14} style={{verticalAlign:"middle",marginRight:6}}/>แผนระยะนี้จะแสดงเมื่อมีบทเรียนที่จัดทำและตรวจเนื้อหาแล้ว</p>}</section>)}</div>}
+"use client";
+
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { BookOpen, CheckCircle2, Lock, PlayCircle } from "lucide-react";
+
+type Lesson = { id: number; slug: string; title: string; description: string; position: number; status: "locked" | "available" | "in_progress" | "completed"; passed: boolean };
+type ModuleProgress = { slug: string; title: string; position: number; lessons: Lesson[]; completed: number; total: number; percent: number };
+type CourseData = { modules: ModuleProgress[]; completed: number; total: number; percent: number };
+
+export default function Courses() {
+  const [data, setData] = useState<CourseData>();
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/courses").then((response) => {
+      if (!response.ok) throw new Error("courses request failed");
+      return response.json();
+    }).then(setData).catch(() => setError(true));
+  }, []);
+
+  return <div className="shell courses-page">
+    <p className="muted">เส้นทางการเรียน</p>
+    <h1>หลักสูตรภาษาเกาหลี</h1>
+    <p className="muted">เรียนตามลำดับจากฮันกึลสู่ภาษาเกาหลีในชีวิตประจำวัน · ผ่านแบบทดสอบบทก่อนหน้าเพื่อปลดล็อกบทถัดไป</p>
+    {data && <section className="card course-overview" aria-label="ความคืบหน้าหลักสูตร">
+      <strong>{data.completed} จาก {data.total} บทเรียน</strong><span>{data.percent}%</span>
+      <div className="progress-track"><span style={{ width: `${data.percent}%` }} /></div>
+    </section>}
+    {error && <p role="alert" className="notice error-notice">โหลดหลักสูตรไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>}
+    {!data && !error && <p role="status" className="card">กำลังโหลดหลักสูตร…</p>}
+    {data?.modules.map((module) => <section key={module.slug} className="card course-module" aria-labelledby={`module-${module.slug}`}>
+      <div className="course-module-heading">
+        <span className="badge">โมดูล {module.position}</span>
+        <h2 id={`module-${module.slug}`}>{module.title}</h2>
+        <span className="course-module-progress">{module.completed}/{module.total} บท · {module.percent}%</span>
+      </div>
+      <div className="progress-track module-progress"><span style={{ width: `${module.percent}%` }} /></div>
+      <div className="grid course-lesson-grid">
+        {module.lessons.map((lesson) => <Link key={lesson.id} href={lesson.status === "locked" ? "#" : `/learn/${lesson.slug}`} onClick={(event) => lesson.status === "locked" && event.preventDefault()} aria-disabled={lesson.status === "locked"} className={`card course-lesson-card status-${lesson.status}`}>
+          <div className="course-lesson-meta"><span className="badge">บท {lesson.position}</span>{lesson.status === "locked" ? <Lock size={17} aria-label="ล็อกอยู่"/> : lesson.status === "completed" ? <CheckCircle2 size={18} aria-label="ผ่านแล้ว"/> : <PlayCircle size={18} aria-label="พร้อมเรียน"/>}</div>
+          <h3>{lesson.title}</h3>
+          <p className="muted">{lesson.description}</p>
+          <span className="course-lesson-status">{lesson.status === "locked" ? "ล็อก · ผ่านบทก่อนหน้าเพื่อปลดล็อก" : lesson.status === "completed" ? "ผ่านแล้ว · เปิดทบทวนได้" : lesson.status === "in_progress" ? "กำลังเรียน" : "พร้อมเรียน"}</span>
+        </Link>)}
+      </div>
+      {module.lessons.length === 0 && <p className="muted"><BookOpen size={14}/> โมดูลนี้ยังไม่มีบทเรียน</p>}
+    </section>)}
+  </div>;
+}

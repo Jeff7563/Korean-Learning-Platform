@@ -17,8 +17,8 @@ export async function GET(request: Request) {
   if (!isLocalDate(date)) return NextResponse.json({ error: "วันที่ไม่ถูกต้อง" }, { status: 400 });
   const database = db();
   ensureDailyPlan(database, date);
-  const plan = database.prepare(`SELECT p.plan_date date,p.mode,p.recommendation,p.recommendation_href recommendationHref,p.planned_minutes plannedMinutes,p.actual_minutes actualMinutes,l.slug lessonSlug,l.title lessonTitle
-    FROM daily_plans p LEFT JOIN lessons l ON l.id=p.lesson_id WHERE p.plan_date=?`).get(date) as { date: string; mode: StudyMode; recommendation: string; recommendationHref: string; plannedMinutes: number; actualMinutes: number; lessonSlug: string | null; lessonTitle: string | null };
+  const plan = database.prepare(`SELECT p.plan_date date,p.mode,p.recommendation,p.recommendation_href recommendationHref,p.planned_minutes plannedMinutes,p.actual_minutes actualMinutes,l.slug lessonSlug,l.title lessonTitle,m.title moduleTitle,m.position modulePosition
+    FROM daily_plans p LEFT JOIN lessons l ON l.id=p.lesson_id LEFT JOIN modules m ON m.id=l.module_id WHERE p.plan_date=?`).get(date) as { date: string; mode: StudyMode; recommendation: string; recommendationHref: string; plannedMinutes: number; actualMinutes: number; lessonSlug: string | null; lessonTitle: string | null; moduleTitle: string | null; modulePosition: number | null };
   const tasks = database.prepare("SELECT id,task_key taskKey,title,starts_at startsAt,ends_at endsAt,planned_minutes plannedMinutes,href,optional,completed_at completedAt FROM daily_plan_tasks WHERE plan_date=? ORDER BY id").all(date) as Array<{ id: number; taskKey: string; title: string; startsAt: string | null; endsAt: string | null; plannedMinutes: number; href: string; optional: number; completedAt: string | null }>;
   const required = tasks.filter((task) => !task.optional);
   const completeCount = required.filter((task) => task.completedAt).length;
@@ -32,7 +32,7 @@ export async function GET(request: Request) {
     date, today, isToday: date === today,
     dateLabel: new Intl.DateTimeFormat("th-TH", { timeZone: "Asia/Bangkok", dateStyle: "full" }).format(new Date(`${date}T12:00:00Z`)),
     mode: plan.mode, recommendation: plan.recommendation, recommendationHref: plan.recommendationHref,
-    lesson: plan.lessonSlug ? { slug: plan.lessonSlug, title: plan.lessonTitle } : null,
+    lesson: plan.lessonSlug ? { slug: plan.lessonSlug, title: plan.lessonTitle, moduleTitle: plan.moduleTitle, modulePosition: plan.modulePosition } : null,
     plannedMinutes: plan.plannedMinutes, actualMinutes: plan.actualMinutes,
     completedCount: completeCount, requiredCount: required.length,
     completionPercent: required.length ? Math.round((completeCount / required.length) * 100) : 0,
