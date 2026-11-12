@@ -1,0 +1,8 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+import { db } from "@/lib/db";
+import { advanceEpsSection, finalizeEpsAttempt, getEpsAttempt, saveEpsAnswer } from "@/lib/eps-topik";
+export const runtime = "nodejs";
+const schema=z.discriminatedUnion("action",[z.object({action:z.literal("answer"),questionId:z.number().int().positive(),selectedIndex:z.number().int().min(0).max(3)}),z.object({action:z.literal("submit")}),z.object({action:z.literal("continue-section")})]);
+export async function GET(_r:Request,{params}:{params:Promise<{attemptId:string}>}){const id=Number((await params).attemptId);if(!Number.isSafeInteger(id)||id<1)return NextResponse.json({error:"ไม่พบ"},{status:404});const data=getEpsAttempt(db(),id);return data?NextResponse.json(data):NextResponse.json({error:"ไม่พบ"},{status:404});}
+export async function POST(request:Request,{params}:{params:Promise<{attemptId:string}>}){const id=Number((await params).attemptId);const p=schema.safeParse(await request.json().catch(()=>null));if(!Number.isSafeInteger(id)||id<1||!p.success)return NextResponse.json({error:"ข้อมูลไม่ถูกต้อง"},{status:400});const d=db();if(p.data.action==="submit"){const result=finalizeEpsAttempt(d,id);return result?NextResponse.json(result):NextResponse.json({error:"ไม่พบ"},{status:404});}if(p.data.action==="continue-section"){if(!advanceEpsSection(d,id))return NextResponse.json({error:"ไม่สามารถเปลี่ยนส่วนได้"},{status:409});return NextResponse.json(getEpsAttempt(d,id));}const result=saveEpsAnswer(d,id,p.data.questionId,p.data.selectedIndex);if(result.ok)return NextResponse.json({ok:true});return NextResponse.json({error:result.expired?"หมดเวลาแล้ว":result.error},{status:result.error==="not_found"?404:409});}

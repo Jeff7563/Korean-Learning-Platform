@@ -30,4 +30,20 @@ if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(vocabularySr
     db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(vocabularySrsMigration);
   })();
 }
+const epsTopikMigration = "0005_eps_topik_simulator.sql";
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(epsTopikMigration)) {
+  const migrationSql = readFileSync(join(process.cwd(), "scripts", "migrations", epsTopikMigration), "utf8");
+  db.transaction(() => {
+    db.exec(migrationSql);
+    db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(epsTopikMigration);
+  })();
+}
+const epsSectionsMigration = "0006_eps_exam_sections.sql";
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(epsSectionsMigration)) {
+  const migrationSql = readFileSync(join(process.cwd(), "scripts", "migrations", epsSectionsMigration), "utf8");
+  db.transaction(() => {
+    db.exec(migrationSql);
+    db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(epsSectionsMigration);
+  })();
+}
 console.log(`Migration ready: ${dbPath}`); db.close();

@@ -1,12 +1,13 @@
 ﻿"use client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BookOpen, LayoutDashboard, NotebookPen, Settings, Sparkles } from "lucide-react";
+import { BookOpen, LayoutDashboard, NotebookPen, Settings, Sparkles, ClipboardCheck } from "lucide-react";
 
 const items = [
   { href: "/dashboard", label: "หน้าแรก", Icon: LayoutDashboard },
   { href: "/courses", label: "หลักสูตร", Icon: BookOpen },
   { href: "/review", label: "ทบทวน", Icon: NotebookPen },
+  { href: "/eps-topik", label: "EPS-TOPIK", Icon: ClipboardCheck },
   { href: "/settings", label: "ตั้งค่า", Icon: Settings },
 ];
 
