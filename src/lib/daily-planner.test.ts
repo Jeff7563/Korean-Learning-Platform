@@ -49,6 +49,11 @@ describe("Bangkok planner calendar and schedules", () => {
     expect(rest[0].optional).toBe(true);
     expect(rest[0].minutes).toBe(0);
   });
+  it("routes lesson sections to review when no lesson is available", () => {
+    for (const mode of ["standard", "light"] as const) {
+      expect(scheduledTasks(mode).every((task) => !task.href.startsWith("/review#"))).toBe(true);
+    }
+  });
 });
 
 describe("progress-aware recommendations", () => {
@@ -67,6 +72,18 @@ describe("progress-aware recommendations", () => {
     database.prepare("INSERT INTO checkpoint_attempts(lesson_id,score,total,passed) VALUES(2,5,5,1)").run();
     expect(recommendStudy(database)).toMatchObject({ lesson: { slug: "lesson-two" }, href: "/review" });
     database.close();
+  });
+  it("does not treat a failed retake of an already-passed lesson as the current recommendation", () => {
+    const database = createDb();
+    database.prepare("INSERT INTO lessons VALUES(3,'lesson-three','Lesson Three',3)").run();
+    database.prepare("INSERT INTO checkpoint_attempts(id,lesson_id,score,total,passed) VALUES(1,1,5,5,1),(2,1,0,5,0)").run();
+    expect(recommendStudy(database)).toMatchObject({ lesson: { slug: "lesson-two" }, href: "/learn/lesson-two#lesson-activities" });
+    database.close();
+
+    const completed = createDb();
+    completed.prepare("INSERT INTO checkpoint_attempts(id,lesson_id,score,total,passed) VALUES(1,1,5,5,1),(2,2,5,5,1),(3,1,0,5,0)").run();
+    expect(recommendStudy(completed)).toMatchObject({ lesson: { slug: "lesson-two" }, href: "/review" });
+    completed.close();
   });
 });
 

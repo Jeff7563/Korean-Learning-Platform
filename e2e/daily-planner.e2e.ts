@@ -1,5 +1,29 @@
 import { expect, test } from "@playwright/test";
 
+function shiftDate(date: string, amount: number) {
+  const shifted = new Date(`${date}T12:00:00Z`);
+  shifted.setUTCDate(shifted.getUTCDate() + amount);
+  return shifted.toISOString().slice(0, 10);
+}
+
+test("today uses Bangkok time and previous-day activity is summarized", async ({ request }) => {
+  const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Bangkok", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+  const todayPlan = await (await request.get("/api/daily-plan")).json();
+  expect(todayPlan).toMatchObject({ date: today, today, isToday: true });
+  const todayIsSunday = new Date(`${today}T00:00:00Z`).getUTCDay() === 0;
+  expect(todayPlan).toMatchObject(todayIsSunday ? { mode: "rest", plannedMinutes: 0 } : { mode: "standard", plannedMinutes: 90 });
+
+  const previousDate = shiftDate(today, -1);
+  const previousPlan = await (await request.get(`/api/daily-plan?date=${previousDate}`)).json();
+  expect(previousPlan.tasks.length).toBeGreaterThan(0);
+  expect((await request.post("/api/daily-plan", { data: { action: "task", date: previousDate, taskId: previousPlan.tasks[0].id, completed: true } })).ok()).toBeTruthy();
+  expect((await request.post("/api/daily-plan", { data: { action: "time", date: previousDate, minutes: 12 } })).ok()).toBeTruthy();
+
+  const refreshedToday = await (await request.get("/api/daily-plan")).json();
+  expect(refreshedToday.previous).toMatchObject({ date: previousDate, actualMinutes: 12 });
+  expect(refreshedToday.previous.taskCount).toBe(previousPlan.requiredCount);
+});
+
 test("daily plans, modes, and actual study time persist independently from course progress", async ({ request }) => {
   const date = "2030-01-07"; // Monday, selected as a future date so the case is stable on every run.
   const beforeProgress = await (await request.get("/api/courses")).json();

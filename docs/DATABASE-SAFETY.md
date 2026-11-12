@@ -10,3 +10,5 @@ Stop the app before copying or restoring its database. Keep backups outside the 
 ## E2E database isolation
 
 Playwright starts a dedicated app on port 3101 with a unique SQLite file under the operating system temporary directory. It does not reuse an existing server. E2E tests can modify only that disposable test database; normal learner data is not reset or modified by the test run.
+
+For safe Windows Next.js port and stale-process checks, see [WINDOWS-DEV-SERVER.md](./WINDOWS-DEV-SERVER.md).

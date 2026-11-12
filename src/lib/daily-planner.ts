@@ -25,19 +25,19 @@ export function defaultModeForDate(value: string): StudyMode {
 }
 
 export function scheduledTasks(mode: StudyMode, lessonSlug?: string): PlannerTask[] {
-  const lesson = lessonSlug ? `/learn/${lessonSlug}` : "/review";
+  const lessonSection = (section: string) => lessonSlug ? `/learn/${lessonSlug}#${section}` : "/review";
   if (mode === "rest") return [{ key: "casual", title: "เรียนภาษาเกาหลีแบบสบาย ๆ (เลือกทำได้)", startsAt: null, endsAt: null, minutes: 0, href: "/review", optional: true }];
   if (mode === "light") return [
     { key: "review", title: "ทบทวนคำศัพท์หรือข้อที่ตอบผิด", startsAt: "18:00", endsAt: "18:05", minutes: 5, href: "/review" },
-    { key: "video-listening", title: "ดูวิดีโอหรือฝึกฟังภาษาเกาหลี", startsAt: "18:05", endsAt: "18:10", minutes: 5, href: `${lesson}#video` },
-    { key: "writing-vocabulary", title: "เขียนหรือทบทวนคำศัพท์ 1 ชุด", startsAt: "18:10", endsAt: "18:15", minutes: 5, href: `${lesson}#lesson-activities` },
+    { key: "video-listening", title: "ดูวิดีโอหรือฝึกฟังภาษาเกาหลี", startsAt: "18:05", endsAt: "18:10", minutes: 5, href: lessonSection("video") },
+    { key: "writing-vocabulary", title: "เขียนหรือทบทวนคำศัพท์ 1 ชุด", startsAt: "18:10", endsAt: "18:15", minutes: 5, href: lessonSection("lesson-activities") },
   ];
   return [
-    { key: "preparation", title: "เตรียมตัวและทบทวนคำศัพท์", startsAt: "18:00", endsAt: "18:15", minutes: 15, href: `${lesson}#vocabulary` },
-    { key: "video", title: "เรียนจากวิดีโอสอน", startsAt: "18:15", endsAt: "18:45", minutes: 30, href: `${lesson}#video` },
-    { key: "listening-reading", title: "ฝึกฟัง พูด และอ่าน", startsAt: "18:45", endsAt: "19:00", minutes: 15, href: `${lesson}#listening` },
+    { key: "preparation", title: "เตรียมตัวและทบทวนคำศัพท์", startsAt: "18:00", endsAt: "18:15", minutes: 15, href: lessonSection("vocabulary") },
+    { key: "video", title: "เรียนจากวิดีโอสอน", startsAt: "18:15", endsAt: "18:45", minutes: 30, href: lessonSection("video") },
+    { key: "listening-reading", title: "ฝึกฟัง พูด และอ่าน", startsAt: "18:45", endsAt: "19:00", minutes: 15, href: lessonSection("listening") },
     { key: "break", title: "พักสายตาและผ่อนคลาย", startsAt: "19:00", endsAt: "19:15", minutes: 15, href: "/dashboard#daily-plan" },
-    { key: "writing-checkpoint", title: "ฝึกเขียนและทำแบบทดสอบ", startsAt: "19:15", endsAt: "19:25", minutes: 10, href: `${lesson}#lesson-activities` },
+    { key: "writing-checkpoint", title: "ฝึกเขียนและทำแบบทดสอบ", startsAt: "19:15", endsAt: "19:25", minutes: 10, href: lessonSection("lesson-activities") },
     { key: "summary", title: "สรุปสิ่งที่เรียนวันนี้", startsAt: "19:25", endsAt: "19:30", minutes: 5, href: "/review" },
   ];
 }
@@ -55,11 +55,11 @@ export function recommendStudy(database: Database.Database): Recommendation {
   const states = lessons.map((lesson, index) => ({ ...lesson, locked: index > 0 && !lessons[index - 1].passed }));
   const target = states.find((lesson) => !lesson.passed && !lesson.locked) ?? states.at(-1)!;
   const latest = database.prepare(`SELECT a.id,a.passed,l.id lessonId,l.slug,l.title FROM checkpoint_attempts a JOIN lessons l ON l.id=a.lesson_id ORDER BY a.id DESC LIMIT 1`).get() as { id: number; passed: number; lessonId: number; slug: string; title: string } | undefined;
-  if (latest && !latest.passed) {
+  const latestLesson = latest ? states.find((lesson) => lesson.id === latest.lessonId) : undefined;
+  if (latest && !latest.passed && latestLesson && !latestLesson.passed && !latestLesson.locked) {
     const mistakes = database.prepare(`SELECT e.prompt FROM checkpoint_answers ca JOIN exercises e ON e.id=ca.exercise_id WHERE ca.attempt_id=? AND ca.correct=0 ORDER BY e.position`).all(latest.id) as Array<{ prompt: string }>;
     const detail = mistakes.length ? `: ${mistakes.map((item) => item.prompt).join(" · ")}` : "";
-    const lesson = lessons.find((item) => item.id === latest.lessonId) ?? target;
-    return { lesson, reason: `ทบทวนแนวคิดจากข้อที่ตอบผิด${detail}`, href: `/learn/${lesson.slug}#checkpoint` };
+    return { lesson: latestLesson, reason: `ทบทวนแนวคิดจากข้อที่ตอบผิด${detail}`, href: `/learn/${latestLesson.slug}#checkpoint` };
   }
   if (states.every((lesson) => lesson.passed)) return { lesson: states.at(-1)!, reason: "เรียนครบทุกบทแล้ว แนะนำทบทวนคำศัพท์และข้อที่เคยตอบผิด", href: "/review" };
   const incomplete = database.prepare(`SELECT a.title FROM lesson_activities a WHERE a.lesson_id=? AND NOT EXISTS(SELECT 1 FROM learner_activity_progress p WHERE p.activity_id=a.id) ORDER BY a.position LIMIT 1`).get(target.id) as { title: string } | undefined;

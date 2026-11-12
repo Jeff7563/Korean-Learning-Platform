@@ -53,6 +53,20 @@ export default function Learn() {
     return () => { active = false; };
   }, [slug]);
 
+  useEffect(() => {
+    if (!data) return;
+    const scrollToLessonSection = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (id) document.getElementById(id)?.scrollIntoView({ block: "start", behavior: "auto" });
+    };
+    const frame = window.requestAnimationFrame(scrollToLessonSection);
+    window.addEventListener("hashchange", scrollToLessonSection);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener("hashchange", scrollToLessonSection);
+    };
+  }, [data, slug]);
+
   async function markActivity(activityId: number, completed: boolean) {
     setSavingActivity(activityId);
     try {
