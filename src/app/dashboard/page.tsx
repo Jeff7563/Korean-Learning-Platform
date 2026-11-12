@@ -8,11 +8,19 @@ type LessonStatus = "locked" | "available" | "in_progress" | "completed";
 type CourseLesson = { id:number; slug:string; title:string; description:string; position:number; status:LessonStatus; passed:boolean };
 type Activity = { id:number; slug:string; title:string; completed:number };
 type Attempt = { title:string; score:number; total:number; passed:number; created_at:string };
+type DailyTask = { id:number; taskKey:string; title:string; startsAt:string|null; endsAt:string|null; plannedMinutes:number; href:string; optional:number; completedAt:string|null };
+type DailyPlan = { date:string; today:string; isToday:boolean; dateLabel:string; mode:"standard"|"light"|"rest"; recommendation:string; recommendationHref:string; lesson:{slug:string;title:string}|null; plannedMinutes:number; actualMinutes:number; completedCount:number; requiredCount:number; completionPercent:number; tasks:DailyTask[]; previous:{date:string;dateLabel:string;plannedMinutes:number;actualMinutes:number;taskCount:number;completedCount:number}|null };
 type DashboardData = { next?:CourseLesson; lessons:CourseLesson[]; completed:number; total:number; percent:number; recent:Attempt[]; activity:{day:string;count:number}[]; today:string; settings:{daily_minutes:number}|null; aiReady:boolean };
 
 export default function Dashboard() {
   const [data,setData]=useState<DashboardData>();
   const [activities,setActivities]=useState<Activity[]>([]);
+  const [activitiesLoading,setActivitiesLoading]=useState(true);
+  const [plan,setPlan]=useState<DailyPlan>();
+  const [selectedDate,setSelectedDate]=useState("");
+  const [planError,setPlanError]=useState("");
+  const [planSaving,setPlanSaving]=useState(false);
+  const [actualMinutes,setActualMinutes]=useState(15);
   const [loadError,setLoadError]=useState("");
   const [saving,setSaving]=useState<number|null>(null);
   useEffect(()=>{
@@ -20,10 +28,19 @@ export default function Dashboard() {
     fetch("/api/dashboard").then(async response=>{if(!response.ok)throw new Error("โหลดข้อมูลการเรียนไม่สำเร็จ");return response.json() as Promise<DashboardData>}).then(async result=>{
       if(!active)return;setData(result);
       const target=result.next??result.lessons.at(-1);
-      if(target){const response=await fetch(`/api/lessons/${target.slug}`);if(response.ok){const lesson=await response.json();if(active)setActivities(lesson.activities??[]);}}
-    }).catch(error=>{if(active)setLoadError(error instanceof Error?error.message:"เกิดข้อผิดพลาด");});
+      if(target){const response=await fetch(`/api/lessons/${target.slug}`);if(response.ok){const lesson=await response.json();if(active)setActivities(lesson.activities??[]);}else if(active)setLoadError("โหลดกิจกรรมของบทเรียนไม่สำเร็จ");}
+      else if(active)setActivities([]);
+      if(active)setActivitiesLoading(false);
+    }).catch(error=>{if(active){setLoadError(error instanceof Error?error.message:"เกิดข้อผิดพลาด");setActivitiesLoading(false);}});
     return()=>{active=false};
   },[]);
+
+  useEffect(()=>{
+    let active=true;
+    const suffix=selectedDate?`?date=${selectedDate}`:"";
+    fetch(`/api/daily-plan${suffix}`).then(async response=>{if(!response.ok)throw new Error("โหลดแผนเรียนไม่สำเร็จ");return response.json() as Promise<DailyPlan>}).then(result=>{if(active){setPlan(result);setSelectedDate(result.date);setPlanError("");}}).catch(error=>{if(active)setPlanError(error instanceof Error?error.message:"เกิดข้อผิดพลาด");});
+    return()=>{active=false;};
+  },[selectedDate]);
 
   const recentAccuracy=useMemo(()=>{
     if(!data?.recent.length)return null;
@@ -37,6 +54,16 @@ export default function Dashboard() {
     try{const response=await fetch("/api/activities",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({activityId:activity.id,completed})});if(response.ok)setActivities(items=>items.map(item=>item.id===activity.id?{...item,completed:Number(completed)}:item));}
     finally{setSaving(null);}
   }
+
+  async function savePlanChange(payload:Record<string,unknown>){
+    if(!plan)return;
+    setPlanSaving(true);setPlanError("");
+    try{const response=await fetch("/api/daily-plan",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({...payload,date:plan.date})});const result=await response.json();if(!response.ok)throw new Error(result.error??"บันทึกแผนไม่สำเร็จ");const refreshed=await fetch(`/api/daily-plan?date=${plan.date}`);if(!refreshed.ok)throw new Error("โหลดแผนหลังบันทึกไม่สำเร็จ");setPlan(await refreshed.json());}
+    catch(error){setPlanError(error instanceof Error?error.message:"บันทึกแผนไม่สำเร็จ");}
+    finally{setPlanSaving(false);}
+  }
+
+  async function addActualTime(event:React.FormEvent){event.preventDefault();await savePlanChange({action:"time",minutes:actualMinutes});}
 
   const next=data?.next??data?.lessons.at(-1);
   const completedActivities=activities.filter(item=>item.completed).length;
@@ -58,6 +85,8 @@ export default function Dashboard() {
       <div className="hero-art" aria-hidden="true"><div className="hero-orbit orbit-one"/><div className="hero-orbit orbit-two"/><span className="hero-hangul">한글</span><span className="hero-note note-one">가</span><span className="hero-note note-two">나</span><span className="hero-note note-three">다</span><div className="hero-progress"><div><span>ความคืบหน้าหลักสูตร</span><b>{data?.percent??0}%</b></div><div className="progress-track"><span style={{width:`${data?.percent??0}%`}}/></div></div></div>
     </section>
 
+    <DailyPlanner plan={plan} selectedDate={selectedDate} setSelectedDate={setSelectedDate} saving={planSaving} error={planError} onChange={savePlanChange} onRecordTime={addActualTime} actualMinutes={actualMinutes} setActualMinutes={setActualMinutes}/>
+
     <section className="learning-stats" aria-label="สถิติการเรียน">
       <Stat icon={<BookOpen/>} label="บทเรียนที่ผ่าน" value={data?`${data.completed} / ${data.total}`:"—"} detail="บทเรียนในหลักสูตร" tone="blue"/>
       <Stat icon={<Award/>} label="ความแม่นยำล่าสุด" value={recentAccuracy===null?"—":`${recentAccuracy}%`} detail={data?.recent.length?`จาก ${data.recent.length} แบบทดสอบล่าสุด`:"เริ่มทำแบบทดสอบเพื่อดูผล"} tone="amber"/>
@@ -68,9 +97,9 @@ export default function Dashboard() {
     <div className="dashboard-workspace">
       <div className="dashboard-main-column">
         <section className="panel daily-panel" aria-labelledby="daily-title">
-          <div className="section-heading"><div className="section-icon daily-icon"><CalendarDays size={19}/></div><div><p className="eyebrow">NEXT LESSON CHECKLIST</p><h2 id="daily-title">เช็กลิสต์บทเรียนถัดไป</h2></div><span className="completion-count">{completedActivities}/{activities.length||0}</span></div>
+          <div className="section-heading"><div className="section-icon daily-icon"><CalendarDays size={19}/></div><div><p className="eyebrow">LESSON PROGRESS · PERSISTENT</p><h2 id="daily-title">กิจกรรมฝึกของบทเรียนถัดไป</h2></div><span className="completion-count">{completedActivities}/{activities.length||0}</span></div>
           <p className="section-intro">กิจกรรมที่บันทึกไว้ในบทเรียนถัดไป · ติ๊กเมื่อทำเสร็จ สถานะจะคงอยู่จนกว่าคุณจะเปลี่ยนเอง</p>
-          {activities.length?<div className="daily-list">{activities.map((activity,index)=><label key={activity.id} className={`daily-item${activity.completed?" is-complete":""}`}><input type="checkbox" checked={Boolean(activity.completed)} disabled={saving===activity.id} onChange={event=>toggleActivity(activity,event.target.checked)}/><span className="custom-check" aria-hidden="true">{activity.completed?<Check size={15}/>:<span>{index+1}</span>}</span><span className="daily-item-text">{activity.title}</span>{saving===activity.id?<span className="item-meta">กำลังบันทึก</span>:activity.completed?<span className="item-meta done-meta">เสร็จแล้ว</span>:<Circle className="item-circle" size={17}/>}</label>)}</div>:<div className="empty-checklist"><p>{data?"ยังไม่มีกิจกรรมในบทเรียนนี้":"กำลังโหลดเช็กลิสต์…"}</p>{data&&<Link href="/courses" className="text-link">เปิดหลักสูตร <ArrowRight size={15}/></Link>}</div>}
+          {activities.length?<div className="daily-list">{activities.map((activity,index)=><label key={activity.id} className={`daily-item${activity.completed?" is-complete":""}`}><input type="checkbox" checked={Boolean(activity.completed)} disabled={saving===activity.id} onChange={event=>toggleActivity(activity,event.target.checked)}/><span className="custom-check" aria-hidden="true">{activity.completed?<Check size={15}/>:<span>{index+1}</span>}</span><span className="daily-item-text">{activity.title}</span>{saving===activity.id?<span className="item-meta">กำลังบันทึก</span>:activity.completed?<span className="item-meta done-meta">เสร็จแล้ว</span>:<Circle className="item-circle" size={17}/>}</label>)}</div>:<div className="empty-checklist"><p>{activitiesLoading?"กำลังโหลดกิจกรรมของบทเรียน…":"ยังไม่มีกิจกรรมในบทเรียนนี้"}</p>{!activitiesLoading&&data&&<Link href="/courses" className="text-link">เปิดหลักสูตร <ArrowRight size={15}/></Link>}</div>}
           {activities.length>0&&<div className="daily-footer"><span>กิจกรรมส่วนตัวของบทเรียนนี้</span><Link href={next?`/learn/${next.slug}`:"/courses"}>เปิดบทเรียน <ArrowRight size={15}/></Link></div>}
         </section>
 
@@ -90,6 +119,26 @@ export default function Dashboard() {
       </aside>
     </div>
   </div>;
+}
+
+function DailyPlanner({plan,selectedDate,setSelectedDate,saving,error,onChange,onRecordTime,actualMinutes,setActualMinutes}:{plan?:DailyPlan;selectedDate:string;setSelectedDate:(date:string)=>void;saving:boolean;error:string;onChange:(payload:Record<string,unknown>)=>Promise<void>;onRecordTime:(event:React.FormEvent)=>void;actualMinutes:number;setActualMinutes:(minutes:number)=>void}){
+  const sunday=plan?.date?new Date(`${plan.date}T00:00:00Z`).getUTCDay()===0:false;
+  const finished=Boolean(plan&&((plan.requiredCount>0&&plan.completedCount===plan.requiredCount)||(plan.requiredCount===0&&plan.tasks.some(task=>task.completedAt))));
+  const modeLocked=Boolean(plan?.tasks.some(task=>task.completedAt));
+  return <section className="panel planner-panel" id="daily-plan" aria-labelledby="daily-plan-title">
+    <div className="planner-header"><div><p className="eyebrow">YOUR DAILY PLAN · ASIA/BANGKOK</p><h2 id="daily-plan-title">แผนเรียนวันนี้</h2><p>{plan?.dateLabel??"กำลังเตรียมวันที่และแผนเรียน…"}</p></div><label className="planner-date">เลือกวันที่<input aria-label="เลือกวันที่สำหรับดูแผนเรียน" type="date" value={selectedDate} onChange={event=>setSelectedDate(event.target.value)}/></label></div>
+    {error&&<p className="notice error-notice" role="alert">{error}</p>}
+    {!plan?<div className="planner-loading" role="status">กำลังโหลดแผนประจำวัน…</div>:<>
+      <div className="planner-recommendation"><div><span className="recommendation-label">{plan.lesson?"บทเรียนแนะนำ":"คำแนะนำการเรียน"}</span><h3>{plan.lesson?.title??"ทบทวนบทเรียนที่เรียนมา"}</h3><p>{plan.recommendation}</p></div><Link className="btn planner-resume" href={plan.recommendationHref}><Play size={16} fill="currentColor"/> {plan.lesson?"เรียนต่อ":"เริ่มทบทวน"}<ArrowRight size={16}/></Link></div>
+      {sunday&&<p className="planner-rest-note">วันอาทิตย์เป็นวันพักตามค่าเริ่มต้น · กิจกรรมภาษาเกาหลีด้านล่างเลือกทำได้</p>}
+      <div className="planner-controls"><div className="planner-mode" role="group" aria-label="เลือกรูปแบบการเรียน"><span>รูปแบบวันนี้</span><button type="button" aria-pressed={plan.mode==="standard"} disabled={saving||modeLocked} onClick={()=>onChange({action:"mode",mode:"standard"})}>มาตรฐาน · 90 นาที</button><button type="button" aria-pressed={plan.mode==="light"} disabled={saving||modeLocked} onClick={()=>onChange({action:"mode",mode:"light"})}>วันเหนื่อย · 15 นาที</button>{sunday&&<button type="button" aria-pressed={plan.mode==="rest"} disabled={saving||modeLocked} onClick={()=>onChange({action:"mode",mode:"rest"})}>พัก</button>}</div><div className="planner-duration"><strong>{plan.plannedMinutes} นาที</strong><span>เวลาตามแผน{plan.mode==="standard"?" รวมเวลาพัก":""}</span></div></div>
+      <div className="planner-progress"><div><span>ทำสำเร็จ {plan.completedCount} จาก {plan.requiredCount} กิจกรรม</span><strong>{plan.completionPercent}%</strong></div><div className="progress-track"><span style={{width:`${plan.completionPercent}%`}}/></div></div>
+      <ol className="planner-task-list">{plan.tasks.map(task=><li className={`planner-task${task.completedAt?" is-complete":""}${task.optional?" is-optional":""}`} key={task.id}><label><input type="checkbox" checked={Boolean(task.completedAt)} disabled={saving||finished} onChange={event=>onChange({action:"task",taskId:task.id,completed:event.target.checked})}/><span className="planner-task-copy"><strong>{task.title}</strong><small>{task.startsAt&&task.endsAt?`${task.startsAt}–${task.endsAt} · ${task.plannedMinutes} นาที`:task.optional?"ไม่บังคับ · วันพัก":""}</small></span></label><div className="planner-task-links"><Link href={task.href} aria-label={`เปิดกิจกรรม: ${task.title}`}>เปิดกิจกรรม <ArrowRight size={14}/></Link>{task.taskKey==="writing-checkpoint"&&plan.lesson&&<Link href={`/learn/${plan.lesson.slug}#checkpoint`}>เปิดแบบทดสอบ <ArrowRight size={14}/></Link>}</div></li>)}</ol>
+      <div className="planner-records"><form onSubmit={onRecordTime}><label htmlFor="actual-study-minutes">บันทึกเวลาเรียนจริง</label><div><input id="actual-study-minutes" type="number" min={1} max={480} value={actualMinutes} onChange={event=>setActualMinutes(Number(event.target.value))}/><span>นาที</span><button className="btn btn-outline" type="submit" disabled={saving||!actualMinutes}>บันทึกเวลา</button></div></form><p>เวลาตามแผน {plan.plannedMinutes} นาที <span aria-hidden="true">·</span> บันทึกจริง {plan.actualMinutes} นาที</p></div>
+      <div className="planner-previous"><Clock3 size={17}/><div><strong>สรุปวันเรียนก่อนหน้า</strong><span>{plan.previous?`${plan.previous.dateLabel} · ทำได้ ${plan.previous.completedCount}/${plan.previous.taskCount} กิจกรรม · เวลาเรียนจริง ${plan.previous.actualMinutes} นาที`:"ยังไม่มีแผนหรือข้อมูลเวลาที่บันทึกไว้ของวันก่อนหน้า"}</span></div></div>
+      {finished&&<p className="planner-complete" role="status">ทำกิจกรรมตามแผนครบแล้ว · แผนวันนี้ถูกเก็บเป็นประวัติ</p>}
+    </>}
+  </section>;
 }
 
 function Stat({icon,label,value,detail,tone}:{icon:React.ReactNode;label:string;value:string;detail:string;tone:string}){return <article className={`stat-tile tone-${tone}`}><span className="stat-tile-icon">{icon}</span><span className="stat-tile-label">{label}</span><strong className="stat-tile-value">{value}</strong><span className="stat-tile-detail">{detail}</span></article>}

@@ -20,7 +20,7 @@ export function LessonMedia({ resources }: { resources: LessonMediaResource[] })
   }
 
   return (
-    <section className="media-library" aria-labelledby="media-title">
+    <section className="media-library" id="video" aria-labelledby="media-title">
       <div className="media-heading">
         <div>
           <p className="eyebrow">TEACHING MEDIA</p>

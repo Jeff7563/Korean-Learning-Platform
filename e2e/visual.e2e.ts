@@ -15,7 +15,7 @@ test("dashboard and lesson player fit desktop and mobile", async ({ page }) => {
   await expect(page.getByRole("heading", { name: "ยินดีต้อนรับกลับมา" })).toBeVisible();
   await expect(page.getByRole("link", { name: /เรียนต่อ/ })).toBeVisible();
   await expect(page.getByRole("heading", { name: "เส้นทางการเรียน" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "เช็กลิสต์บทเรียนถัดไป" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "กิจกรรมฝึกของบทเรียนถัดไป" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "เช็กลิสต์การเรียนวันนี้" })).toHaveCount(0);
   await expect(page.locator(".daily-item").first()).toBeVisible();
   await page.screenshot({ path: resolve(shots, "dashboard-desktop.png"), fullPage: true });

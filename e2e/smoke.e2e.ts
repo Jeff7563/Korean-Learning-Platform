@@ -12,7 +12,7 @@ test("learner completes a lesson and progress survives reload", async ({ page, r
 
   await page.goto("/dashboard");
   await expect(page.getByRole("heading", { name: "ยินดีต้อนรับกลับมา" })).toBeVisible();
-  await expect(page.getByRole("heading", { name: "เช็กลิสต์บทเรียนถัดไป" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "กิจกรรมฝึกของบทเรียนถัดไป" })).toBeVisible();
   await expect(page.locator(".daily-item").first()).toBeVisible();
   await page.locator(".hero-action").click();
   await expect(page).toHaveURL(/\/learn\//);

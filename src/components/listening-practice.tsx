@@ -33,7 +33,7 @@ export function ListeningPractice({ items, officialAudioResource }: { items: Pra
   }
 
   return (
-    <section className="panel listening-panel" aria-labelledby="listening-title">
+    <section className="panel listening-panel" id="listening" aria-labelledby="listening-title">
       <div className="section-heading">
         <div className="section-icon listening-icon"><Headphones size={19} /></div>
         <div><p className="eyebrow">LISTEN & REPEAT</p><h2 id="listening-title">ฟังและฝึกออกเสียง</h2></div>
