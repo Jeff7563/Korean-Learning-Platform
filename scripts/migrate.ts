@@ -22,4 +22,12 @@ if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(dailyPlanner
     db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(dailyPlannerMigration);
   })();
 }
+const vocabularySrsMigration = "0004_vocabulary_srs.sql";
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(vocabularySrsMigration)) {
+  const migrationSql = readFileSync(join(process.cwd(), "scripts", "migrations", vocabularySrsMigration), "utf8");
+  db.transaction(() => {
+    db.exec(migrationSql);
+    db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(vocabularySrsMigration);
+  })();
+}
 console.log(`Migration ready: ${dbPath}`); db.close();

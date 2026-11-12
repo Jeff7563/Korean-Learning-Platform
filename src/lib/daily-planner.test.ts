@@ -52,6 +52,14 @@ describe("Bangkok planner calendar and schedules", () => {
     expect(rest[0].optional).toBe(true);
     expect(rest[0].minutes).toBe(0);
   });
+  it("routes due vocabulary into Standard and Light plans without changing their duration", () => {
+    const standard = scheduledTasks("standard", "lesson-one", 4);
+    const light = scheduledTasks("light", "lesson-one", 4);
+    expect(standard[0]).toMatchObject({ href:"/review",minutes:15,title:expect.stringContaining("4") });
+    expect(standard.reduce((sum, task) => sum + task.minutes, 0)).toBe(90);
+    expect(light[0]).toMatchObject({ href:"/review",minutes:5,title:expect.stringContaining("4") });
+    expect(light.reduce((sum, task) => sum + task.minutes, 0)).toBe(15);
+  });
   it("routes lesson sections to review when no lesson is available", () => {
     for (const mode of ["standard", "light"] as const) {
       expect(scheduledTasks(mode).every((task) => !task.href.startsWith("/review#"))).toBe(true);
@@ -106,6 +114,23 @@ describe("daily plan persistence and learner data safety", () => {
     expect(database.prepare("SELECT recommendation FROM daily_plans WHERE plan_date='2026-11-09'").get()).toEqual({ recommendation: before.recommendation });
     expect(database.prepare("SELECT count(*) n FROM daily_plan_tasks WHERE plan_date='2026-11-09'").get()).toEqual({ n: 3 });
     expect(database.prepare("SELECT count(*) n FROM learner_lesson_progress").get()).toEqual({ n: 0 });
+    database.close();
+  });
+
+  it("adds vocabulary review only to a newly generated plan and leaves an existing plan intact", () => {
+    const database = createDb();
+    database.exec("CREATE TABLE vocabulary(id INTEGER PRIMARY KEY,lesson_id INTEGER,korean TEXT,thai TEXT);");
+    database.exec(readFileSync(join(process.cwd(), "scripts", "migrations", "0004_vocabulary_srs.sql"), "utf8"));
+    database.prepare("INSERT INTO vocabulary VALUES(1,1,'안녕','สวัสดี')").run();
+    database.exec(readFileSync(join(process.cwd(), "scripts", "migrations", "0003_daily_learning_plans.sql"), "utf8"));
+    ensureDailyPlan(database,"2026-11-09");
+    const originalHref = (database.prepare("SELECT href FROM daily_plan_tasks WHERE plan_date='2026-11-09' AND task_key='preparation'").get() as { href:string }).href;
+    database.prepare(`INSERT INTO vocabulary_review_state(vocabulary_id,due_date,interval_days,review_count,lapse_count,last_reviewed_date,last_rating)
+      VALUES(1,'2026-11-08',3,1,0,'2026-11-05','good')`).run();
+    ensureDailyPlan(database,"2026-11-09");
+    expect((database.prepare("SELECT href FROM daily_plan_tasks WHERE plan_date='2026-11-09' AND task_key='preparation'").get() as { href:string }).href).toBe(originalHref);
+    ensureDailyPlan(database,"2026-11-10");
+    expect(database.prepare("SELECT href,title,planned_minutes FROM daily_plan_tasks WHERE plan_date='2026-11-10' AND task_key='preparation'").get()).toMatchObject({ href:"/review",title:expect.stringContaining("1"),planned_minutes:15 });
     database.close();
   });
 

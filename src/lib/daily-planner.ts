@@ -1,4 +1,5 @@
 import type Database from "better-sqlite3";
+import { getDueVocabularyCount } from "./vocabulary-srs";
 
 export const BANGKOK_TIME_ZONE = "Asia/Bangkok";
 export type StudyMode = "standard" | "light" | "rest";
@@ -24,16 +25,16 @@ export function defaultModeForDate(value: string): StudyMode {
   return weekdayForLocalDate(value) === 0 ? "rest" : "standard";
 }
 
-export function scheduledTasks(mode: StudyMode, lessonSlug?: string): PlannerTask[] {
+export function scheduledTasks(mode: StudyMode, lessonSlug?: string, dueVocabularyCount = 0): PlannerTask[] {
   const lessonSection = (section: string) => lessonSlug ? `/learn/${lessonSlug}#${section}` : "/review";
-  if (mode === "rest") return [{ key: "casual", title: "เรียนภาษาเกาหลีแบบสบาย ๆ (เลือกทำได้)", startsAt: null, endsAt: null, minutes: 0, href: "/review", optional: true }];
+  if (mode === "rest") return [{ key: "casual", title: dueVocabularyCount ? `ทบทวนคำศัพท์ที่ถึงกำหนด ${dueVocabularyCount} คำ หรือพักผ่อน (เลือกทำได้)` : "เรียนภาษาเกาหลีแบบสบาย ๆ (เลือกทำได้)", startsAt: null, endsAt: null, minutes: 0, href: "/review", optional: true }];
   if (mode === "light") return [
-    { key: "review", title: "ทบทวนคำศัพท์หรือข้อที่ตอบผิด", startsAt: "18:00", endsAt: "18:05", minutes: 5, href: "/review" },
+    { key: "review", title: dueVocabularyCount ? `ทบทวนคำศัพท์ที่ถึงกำหนด ${dueVocabularyCount} คำ` : "ทบทวนคำศัพท์หรือข้อที่ตอบผิด", startsAt: "18:00", endsAt: "18:05", minutes: 5, href: "/review" },
     { key: "video-listening", title: "ดูวิดีโอหรือฝึกฟังภาษาเกาหลี", startsAt: "18:05", endsAt: "18:10", minutes: 5, href: lessonSection("video") },
     { key: "writing-vocabulary", title: "เขียนหรือทบทวนคำศัพท์ 1 ชุด", startsAt: "18:10", endsAt: "18:15", minutes: 5, href: lessonSection("lesson-activities") },
   ];
   return [
-    { key: "preparation", title: "เตรียมตัวและทบทวนคำศัพท์", startsAt: "18:00", endsAt: "18:15", minutes: 15, href: lessonSection("vocabulary") },
+    { key: "preparation", title: dueVocabularyCount ? `ทบทวนคำศัพท์ที่ถึงกำหนด ${dueVocabularyCount} คำ` : "เตรียมตัวและทบทวนคำศัพท์", startsAt: "18:00", endsAt: "18:15", minutes: 15, href: dueVocabularyCount ? "/review" : lessonSection("vocabulary") },
     { key: "video", title: "เรียนจากวิดีโอสอน", startsAt: "18:15", endsAt: "18:45", minutes: 30, href: lessonSection("video") },
     { key: "listening-reading", title: "ฝึกฟัง พูด และอ่าน", startsAt: "18:45", endsAt: "19:00", minutes: 15, href: lessonSection("listening") },
     { key: "break", title: "พักสายตาและผ่อนคลาย", startsAt: "19:00", endsAt: "19:15", minutes: 15, href: "/dashboard#daily-plan" },
@@ -83,7 +84,7 @@ export function ensureDailyPlan(database: Database.Database, date: string) {
     database.prepare("INSERT OR IGNORE INTO daily_plans(plan_date,mode,lesson_id,recommendation,recommendation_href,planned_minutes) VALUES(?,?,?,?,?,?)").run(date, mode, recommendation.lesson?.id ?? null, recommendation.reason, recommendation.href, plannedMinutes);
     const inserted = database.prepare("SELECT mode,lesson_id FROM daily_plans WHERE plan_date=?").get(date) as { mode: StudyMode; lesson_id: number | null };
     const lesson = inserted.lesson_id ? database.prepare("SELECT slug FROM lessons WHERE id=?").get(inserted.lesson_id) as { slug: string } | undefined : undefined;
-    const rows = scheduledTasks(inserted.mode, lesson?.slug);
+    const rows = scheduledTasks(inserted.mode, lesson?.slug, getDueVocabularyCount(database, date));
     const insertTask = database.prepare("INSERT OR IGNORE INTO daily_plan_tasks(plan_date,task_key,title,starts_at,ends_at,planned_minutes,href,optional) VALUES(?,?,?,?,?,?,?,?)");
     for (const task of rows) insertTask.run(date, task.key, task.title, task.startsAt, task.endsAt, task.minutes, task.href, task.optional ? 1 : 0);
   });
@@ -96,7 +97,7 @@ export function changePlanMode(database: Database.Database, date: string, mode: 
   const plan = database.prepare("SELECT lesson_id FROM daily_plans WHERE plan_date=?").get(date) as { lesson_id: number | null } | undefined;
   if (!plan) return false;
   const lesson = plan.lesson_id ? database.prepare("SELECT slug FROM lessons WHERE id=?").get(plan.lesson_id) as { slug: string } | undefined : undefined;
-  const tasks = scheduledTasks(mode, lesson?.slug);
+  const tasks = scheduledTasks(mode, lesson?.slug, getDueVocabularyCount(database, date));
   const plannedMinutes = mode === "standard" ? 90 : mode === "light" ? 15 : 0;
   database.transaction(() => {
     database.prepare("UPDATE daily_plans SET mode=?,planned_minutes=? WHERE plan_date=?").run(mode, plannedMinutes, date);

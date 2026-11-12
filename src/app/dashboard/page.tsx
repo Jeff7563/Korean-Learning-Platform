@@ -11,7 +11,7 @@ type Activity = { id:number; slug:string; title:string; completed:number };
 type Attempt = { title:string; score:number; total:number; passed:number; created_at:string };
 type DailyTask = { id:number; taskKey:string; title:string; startsAt:string|null; endsAt:string|null; plannedMinutes:number; href:string; optional:number; completedAt:string|null };
 type DailyPlan = { date:string; today:string; isToday:boolean; dateLabel:string; mode:"standard"|"light"|"rest"; recommendation:string; recommendationHref:string; lesson:{slug:string;title:string;moduleTitle:string|null;modulePosition:number|null}|null; plannedMinutes:number; actualMinutes:number; completedCount:number; requiredCount:number; completionPercent:number; tasks:DailyTask[]; previous:{date:string;dateLabel:string;plannedMinutes:number;actualMinutes:number;taskCount:number;completedCount:number}|null };
-type DashboardData = { next?:CourseLesson; lessons:CourseLesson[]; modules:CourseModule[]; completed:number; total:number; percent:number; recent:Attempt[]; activity:{day:string;count:number}[]; today:string; settings:{daily_minutes:number}|null; aiReady:boolean };
+type DashboardData = { next?:CourseLesson; lessons:CourseLesson[]; modules:CourseModule[]; completed:number; total:number; percent:number; recent:Attempt[]; activity:{day:string;count:number}[]; today:string; settings:{daily_minutes:number}|null; dueVocabularyCount:number; aiReady:boolean };
 
 export default function Dashboard() {
   const [data,setData]=useState<DashboardData>();
@@ -74,6 +74,8 @@ export default function Dashboard() {
     <header className="dashboard-topline"><div><p className="eyebrow">LEARN AT YOUR PACE</p><h1>ยินดีต้อนรับกลับมา</h1><p className="dashboard-subtitle">เรียนทีละบท ฝึกสม่ำเสมอ แล้วภาษาเกาหลีจะค่อย ๆ เป็นของคุณ</p></div><Link href="/courses" className="text-link">ดูหลักสูตร <ArrowRight size={16}/></Link></header>
 
     {loadError&&<div className="notice error-notice" role="alert">{loadError}</div>}
+
+    <Link href="/review" className="vocab-due-banner"><span>ทบทวนคำศัพท์ที่ถึงเวลา</span><strong>{data?.dueVocabularyCount ?? "—"} คำ</strong><ArrowRight size={17}/></Link>
 
     <section className="learning-hero" aria-labelledby="next-lesson-title">
       <div className="hero-copy">
