@@ -47,13 +47,20 @@ describe("curriculum seeding", () => {
 
     const learnerSnapshot = () => Object.fromEntries(["learner_lesson_progress", "checkpoint_attempts", "checkpoint_answers", "checkpoint_answer_snapshots", "learner_activity_progress", "tutor_messages", "daily_plans", "daily_plan_tasks", "vocabulary_review_state", "vocabulary_review_events", "eps_attempts", "eps_attempt_answers"].map((table) => [table, database.prepare(`SELECT * FROM ${table} ORDER BY rowid`).all()]));
     const before = learnerSnapshot();
-    const lessonIds = database.prepare("SELECT id,slug FROM lessons ORDER BY id").all();
+    const lessonIds = database.prepare("SELECT id,slug FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all();
+    const originalLessons = database.prepare("SELECT id,slug,title,description,content_json,position,module_id FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all();
+    const originalExercises = database.prepare("SELECT e.id,e.lesson_id,e.position,e.prompt,e.options_json,e.answer_index,e.explanation FROM exercises e JOIN lessons l ON l.id=e.lesson_id WHERE l.slug NOT LIKE 'grammar-%' ORDER BY e.id").all();
     run("scripts/seed.ts");
     run("scripts/seed.ts");
     expect(learnerSnapshot()).toEqual(before);
-    expect(database.prepare("SELECT id,slug FROM lessons ORDER BY id").all()).toEqual(lessonIds);
-    expect(database.prepare("SELECT count(*) count FROM lessons").get()).toEqual({ count: 20 });
-    expect(database.prepare("SELECT count(*) count FROM exercises").get()).toEqual({ count: 100 });
+    expect(database.prepare("SELECT id,slug FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all()).toEqual(lessonIds);
+    expect(database.prepare("SELECT id,slug,title,description,content_json,position,module_id FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all()).toEqual(originalLessons);
+    expect(database.prepare("SELECT e.id,e.lesson_id,e.position,e.prompt,e.options_json,e.answer_index,e.explanation FROM exercises e JOIN lessons l ON l.id=e.lesson_id WHERE l.slug NOT LIKE 'grammar-%' ORDER BY e.id").all()).toEqual(originalExercises);
+    expect(database.prepare("SELECT count(*) count FROM lessons").get()).toEqual({ count: 30 });
+    expect(database.prepare("SELECT count(*) count FROM exercises").get()).toEqual({ count: 150 });
+    expect(database.prepare("SELECT slug,position,(SELECT count(*) FROM lessons WHERE module_id=modules.id) lessons FROM modules ORDER BY position").all()).toEqual([
+      { slug: "hangul-foundation", position: 1, lessons: 10 }, { slug: "everyday-korean", position: 2, lessons: 10 }, { slug: "korean-grammar", position: 3, lessons: 10 },
+    ]);
     expect(database.prepare("SELECT id FROM vocabulary WHERE lesson_id=? ORDER BY id LIMIT 1").get(lessonId)).toEqual({ id:vocabularyId });
     expect(database.pragma("integrity_check")).toEqual([{ integrity_check: "ok" }]);
     database.close();

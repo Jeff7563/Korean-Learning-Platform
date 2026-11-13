@@ -19,7 +19,7 @@ const checked = {
   method: "ตรวจชื่อ/หัวข้อจากหน้า YouTube หรือหน้าแหล่งเรียนรู้ต้นฉบับ",
 };
 
-const video = (id: string, title: string, creator: string, summary: string): LessonMediaResource => ({
+const video = (id: string, title: string, creator: string, summary: string, verification?: LessonMediaResource["verification"]): LessonMediaResource => ({
   id,
   kind: "youtube",
   title,
@@ -27,7 +27,7 @@ const video = (id: string, title: string, creator: string, summary: string): Les
   url: `https://www.youtube.com/watch?v=${id}`,
   language: "th",
   summary,
-  verification: { ...checked, method: "ตรวจชื่อและช่องจาก YouTube oEmbed และเปิดลิงก์ต้นฉบับได้" },
+  verification: verification ?? checked,
 });
 
 const openHangul = (id: string, slug: string, title: string, summary: string): LessonMediaResource => ({
@@ -116,6 +116,8 @@ const hangulOverview = openHangul(
 );
 
 export const lessonMediaCatalog: Record<string, LessonMediaResource[]> = {
+  "grammar-present-tense": [video("xXKsp0wiYB4", "ไวยากรณ์ภาษาเกาหลี: 아요/어요", "SEOUL HI", "Thai-language teaching video focused on polite present forms, with examples including 가다, 먹다, and 공부하다.", { status: "verified", checkedAt: "2026-11-13", method: "Verified exact title, channel and example verbs from source video metadata; direct player fetch was restricted by the research tool." })],
+  "grammar-integrated-review": [hrdThaiTextbook("hrd-thai-grammar-reference", "หนังสือเรียนทางการสำหรับผู้เรียนชาวไทย มีบทสนทนา คำศัพท์ ไวยากรณ์พร้อมคำอธิบายภาษาไทย และสื่อเสียงประกอบ ใช้เป็นแหล่งอ่านเสริมทั่วไป ไม่ได้อ้างว่าแต่ละบทตรงกับไวยากรณ์ในบทเรียนนี้ทั้งหมด")],
   "hangul-intro": [
     hangulBasicsVideo,
     openHangul("openhangul-vowels-1", "hangul-vowels-1", "สระพื้นฐาน I: ㅏ ㅓ ㅗ ㅜ ㅡ ㅣ", "บทเรียนไทยเริ่มต้นเรื่องเสียงและรูปสระพื้นฐาน"),

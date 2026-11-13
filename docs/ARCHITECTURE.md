@@ -8,7 +8,7 @@
 
 ## Content and persistence
 
-- `src/content/curriculum.ts` and `src/content/everyday-korean.ts` hold the 20 main authored lessons. `src/content/teacher-tips.ts` holds five optional mini-lessons. EPS-TOPIK mock forms are authored in versioned content files and seeded immutably.
+- `src/content/curriculum.ts`, `src/content/everyday-korean.ts`, and `src/content/korean-grammar.ts` hold 30 main authored lessons across three modules. `src/content/teacher-tips.ts` holds five optional mini-lessons. EPS-TOPIK mock forms are authored in versioned content files and seeded immutably.
 - `scripts/migrate.ts` applies ordered SQL migrations and records them in `schema_migrations`. `scripts/seed.ts` adds/updates ordinary lesson, activity, and vocabulary material but never rewrites an existing checkpoint exercise. It compares authored checkpoint content with stored rows and fails on drift.
 - Each checkpoint answer now has an immutable snapshot of its question, options, correct index, and explanation. New attempts use `snapshot_kind='captured'`. Migration 0008 copies the last stored exercise text for older attempts using `snapshot_kind='legacy_unverified'`; that is the best available database state and cannot prove it matches the wording shown on the original attempt date.
 - For an intentional checkpoint content revision, first back up and verify the database. Update the authored lesson, then run `pnpm db:revise-checkpoint -- <lesson-slug> <question-position> <absolute-verified-backup-path>`. The command verifies the backup is outside the repository and has a valid V0.7.3-compatible schema, then updates only that exercise. Attempt snapshots remain unchanged. Normal seeding intentionally fails until this explicit revision is performed.

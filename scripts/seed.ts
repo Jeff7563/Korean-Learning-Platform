@@ -33,6 +33,9 @@ database.transaction(() => {
   const putEverydayLesson = database.prepare(
     "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,description=excluded.description,content_json=excluded.content_json",
   );
+  const putGrammarLesson = database.prepare(
+    "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO NOTHING",
+  );
   const putExercise = database.prepare(
     "INSERT INTO exercises(lesson_id,position,prompt,options_json,answer_index,explanation) SELECT id,?,?,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,position) DO NOTHING",
   );
@@ -51,7 +54,7 @@ database.transaction(() => {
   for (const curriculumModule of curriculumModules) {
     const moduleRow = putModule.get(course.id, curriculumModule.slug, curriculumModule.title, curriculumModule.position) as { id: number };
     for (const [index, lesson] of curriculumModule.lessons.entries()) {
-      const writeLesson = curriculumModule.slug === "hangul-foundation" ? putHangulLesson : putEverydayLesson;
+      const writeLesson = curriculumModule.slug === "hangul-foundation" ? putHangulLesson : curriculumModule.slug === "korean-grammar" ? putGrammarLesson : putEverydayLesson;
       writeLesson.run(moduleRow.id, lesson.slug, lesson.title, lesson.description, JSON.stringify(publicLessonContent(lesson)), index + 1);
       for (const [questionIndex, exercise] of lesson.questions.entries()) {
         const position = questionIndex + 1;

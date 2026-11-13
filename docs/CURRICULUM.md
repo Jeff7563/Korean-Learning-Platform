@@ -1,30 +1,27 @@
-# Curriculum overview
+# หลักสูตร KoreanLearning
 
-## Current learning path
+## ภาพรวม
 
-The platform currently has **20 lessons** and **100 checkpoint questions**. Each lesson contains Thai explanations, objectives, Korean examples, vocabulary, practice activities, and five checkpoint questions. The passing threshold is 80%; checklist completion is separate from passing a checkpoint.
+หลักสูตรมี 3 โมดูล รวม 30 บทเรียนหลักและคำถาม checkpoint 150 ข้อ (บทละ 5 ข้อ) เรียนตามลำดับและต้องผ่าน checkpoint ก่อนปลดล็อกบทถัดไป เกณฑ์ผ่านคือ 80% การทำกิจกรรมและ Teacher Tips เป็นการฝึกเสริม ไม่แทนผล checkpoint
 
-| Module | Lessons | Learning progression |
-| --- | ---: | --- |
-| Hangul Foundation | 10 | Hangul overview → basic vowels → basic consonants → syllable construction → compound vowels → tense and aspirated consonants → syllable blocks → batchim → beginner reading → review |
-| Everyday Korean | 10 | Greetings and politeness → introductions → personal information → objects and existence → Sino-Korean numbers → native numbers and counters → days, dates and time → places and locations → shopping and food → integrated review |
+| ลำดับ | โมดูล | บทเรียน | ช่วงเนื้อหา |
+| --- | --- | ---: | --- |
+| 1 | Hangul Foundation | 10 | อักษร ฮันกึล สระ พยัญชนะ ตัวสะกด และการอ่านเบื้องต้น |
+| 2 | Everyday Korean | 10 | ทักทาย แนะนำตัว ข้อมูลส่วนบุคคล ตัวเลข เวลา สถานที่ และสถานการณ์ซื้ออาหาร |
+| 3 | Korean Grammar | 10 | ลำดับประโยคและคำช่วย คำนามเป็น/ไม่เป็น ปัจจุบัน อดีต ปฏิเสธ สถานที่ ความต้องการ/กำลังกระทำ คำขอ การเชื่อมประโยค และทบทวนรวม |
 
-Everyday Korean assumes the learner can read basic Hangul. It introduces common polite speech, distinguishes `해요체` from `합니다체`, and teaches number forms by use: Sino-Korean for money, dates, phone digits and minutes; native Korean for hours and quantities with counters.
+บทที่ 21 จะเปิดเมื่อผ่านบทที่ 1–20 ครบเท่านั้น บทที่ 30 เป็นบทสุดท้ายของโมดูล Korean Grammar เมื่อผ่านครบทั้งสามโมดูล ระบบแสดงความคืบหน้า 30/30 ส่วน EPS-TOPIK Practice ยังคงเปิดแยกจากลำดับหลักสูตร
 
-## Media availability
+## วิธีเรียนและเนื้อหาแต่ละบท
 
-External media supplements the authored lesson content; it is not required to complete a lesson or checkpoint. The player labels YouTube embeds, external video pages, and documents separately and links to the original source. If an external source is unavailable, the lesson explanation, Korean examples, vocabulary, listening prompts, and activities remain usable.
+บทเรียนมีเป้าหมายและคำอธิบายภาษาไทย ตัวอย่างภาษาเกาหลีพร้อมคำแปล คำศัพท์ กิจกรรมฝึก บทสนทนาและการพูดตามในโมดูลที่เพิ่มเนื้อหาเหล่านี้ และ checkpoint พร้อมคำอธิบายหลังตอบ บทเรียนใหม่ยังแสดงจุดที่ผู้เริ่มต้นมักสับสนอย่างชัดเจน
 
-The ten Hangul lessons have relevant Thai KHEM KOREA videos and/or Thai OpenHangul instructional pages. Everyday Korean has verified Thai PBS ALTV episodes for greetings/introduction, objects, and food ordering, plus the publicly accessible Thai HRD Korea textbook where its chapters fit the lesson. Other topics have no verified topic-specific Thai teaching video in this audit; the lesson's own content remains the primary teaching material.
+Vocabulary SRS ใช้คำศัพท์จากบทที่ผู้เรียนเข้าถึงหรือเริ่มเรียนแล้ว Daily Learning Planner แนะนำบทถัดไปตามลำดับความคืบหน้า ประวัติ checkpoint และแผนประจำวันที่บันทึกไว้ไม่ได้ถูกเปลี่ยนโดยการเพิ่มโมดูลนี้
 
-The Thai MOOC Korean Beginner 1 page is a public course overview and syllabus, not an open lesson video. It currently says enrollment is closed. Online King Sejong Institute exposes its curriculum publicly, while course lesson access may require registration or login. HRD Korea's 2024 materials page is a public catalog; the older Thai textbook PDF is directly accessible. See [V0.5.1 media audit](./V0.5.1-MEDIA-AUDIT.md) for exact links, titles, access findings, and per-lesson mapping.
+## สื่อภายนอก
 
-## Planned modules
+เนื้อหาภาษาไทยในตัวบทเรียนเป็นแกนหลัก จึงยังเรียนได้เมื่อวิดีโอภายนอกไม่พร้อมใช้งาน แหล่งสื่อเฉพาะบทและข้อจำกัดการตรวจสอบระบุไว้ใน [MEDIA-SOURCES.md](./MEDIA-SOURCES.md) และ [V0.8-MEDIA-AUDIT.md](./V0.8-MEDIA-AUDIT.md) วิดีโอที่ยังยืนยันการเข้าถึงโดยตรงไม่ได้จะไม่ถูกอ้างว่าเล่นได้แน่นอน
 
-These modules are future plans and do not yet contain lessons:
+## แผนเนื้อหาในอนาคต
 
-- Korean Grammar
-- Workplace Korean
-- EPS-TOPIK Preparation
-
-No additional module is part of the current 20-lesson curriculum.
+ยังไม่มีโมดูล Workplace Korean ในรุ่นนี้ การเพิ่มโมดูลในอนาคตต้องมีขอบเขตและการตรวจทานเนื้อหาแยกต่างหาก ไม่มีการนำเนื้อหาอนาคตมานับใน 30 บทเรียนปัจจุบัน

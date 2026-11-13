@@ -41,3 +41,14 @@ No exact, verified topic-specific Thai teaching video was found for every Everyd
 Lessons provide written Korean prompts and Thai meanings. When a browser has a Korean (`ko-*`) speech synthesis voice, the player can synthesize the prompt and names the voice as synthesized speech. This is not a recording, pronunciation score, or native-speaker guarantee. If no Korean voice exists, learners can still read, repeat aloud, write, and complete checkpoints. The HRD Korea book includes linked audio materials on its official resource page, subject to the source's terms.
 
 For topic-by-topic current assignments and access findings, see [V0.5.1 media audit](./V0.5.1-MEDIA-AUDIT.md).
+
+## Korean Grammar (Module 3)
+
+Reviewed 2026-11-13. Most new lessons rely on their original Thai explanations, examples, dialogues, and speech repetition prompts. Only resources with a clear topic match are assigned; absence of a verified video is shown as an ordinary external-resource fallback.
+
+| Source | Type and verified topic | Assigned lesson | Access notes |
+| --- | --- | --- | --- |
+| [ไวยากรณ์ภาษาเกาหลี: 아요/어요](https://www.youtube.com/watch?v=xXKsp0wiYB4) — SEOUL HI | Thai teaching video metadata identifies polite present-tense forms and gives examples including 가다, 먹다, 보다, 공부하다, 마시다, and 사다 | grammar-present-tense | Exact title, channel, and topic were verified from source video metadata. Direct page fetch was restricted during this audit, so browser playback and regional availability remain unconfirmed. |
+| [หนังสือภาษาเกาหลีมาตรฐาน สำหรับผู้เรียนชาวไทย เล่ม 1](https://epstopik.hrdkorea.or.kr/epstopik/eps_klt/ebook_pdf/4.%20Thailand%201.pdf) — HRD Korea | Official Thai-language self-study textbook with conversations, grammar explanations, and accompanying Thai audio | grammar-integrated-review (general reference only) | The official E-Book index lists the Thai learner books and audio playback. This is a broad supplementary source, not a claim that every grammar lesson matches a particular textbook chapter. |
+
+No video has been assigned to the other nine grammar lessons because a suitable topic-matched Thai teaching video was not verified in this pass. Module 3 remains teachable from its own authored content. See [V0.8-MEDIA-AUDIT.md](./V0.8-MEDIA-AUDIT.md) for the audit notes and limits.

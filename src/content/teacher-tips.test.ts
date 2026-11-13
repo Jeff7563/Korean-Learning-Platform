@@ -16,6 +16,7 @@ describe("optional teacher tips", () => {
     ]);
     for (const tip of teacherTips) {
       expect(lessonSlugs.has(tip.slug), tip.slug).toBe(true);
+      for (const relatedSlug of tip.relatedLessonSlugs ?? []) expect(lessonSlugs.has(relatedSlug), relatedSlug).toBe(true);
       expect(tip.objective.trim().length).toBeGreaterThan(10);
       expect(tip.examples.length).toBeGreaterThanOrEqual(2);
       expect(tip.questions.length).toBeGreaterThanOrEqual(3);

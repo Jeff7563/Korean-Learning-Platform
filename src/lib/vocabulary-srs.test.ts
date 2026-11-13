@@ -16,9 +16,10 @@ function createDatabase() {
     CREATE TABLE lesson_activities(id INTEGER PRIMARY KEY,lesson_id INTEGER);
     CREATE TABLE learner_activity_progress(id INTEGER PRIMARY KEY,activity_id INTEGER);
   `);
-  database.exec(`INSERT INTO courses VALUES(1,'course','Course'); INSERT INTO modules VALUES(1,1,'module','Module',1);
+  database.exec(`INSERT INTO courses VALUES(1,'course','Course'); INSERT INTO modules VALUES(1,1,'module','Module',1),(2,1,'grammar','Korean Grammar',2);
     INSERT INTO lessons VALUES(1,1,'one','Lesson One',1),(2,1,'two','Lesson Two',2),(3,1,'three','Locked Lesson',3);
     INSERT INTO vocabulary VALUES(11,1,'안녕','สวัสดี'),(12,2,'학교','โรงเรียน'),(13,3,'잠','นอน');`);
+  database.exec("INSERT INTO lessons VALUES(4,2,'grammar-one','Grammar lesson',1); INSERT INTO vocabulary VALUES(14,4,'주제','หัวข้อ');");
   database.prepare("INSERT INTO checkpoint_attempts VALUES(1,1,1)").run();
   database.exec(readFileSync(join(process.cwd(), "scripts/migrations/0004_vocabulary_srs.sql"), "utf8"));
   return database;
@@ -54,6 +55,10 @@ describe("persisted review state and learner privacy", () => {
     expect(getVocabularyReviewData(database,"2026-11-12").cards.map((card) => card.id)).toEqual([11,12]);
     database.prepare("INSERT INTO learner_lesson_progress VALUES(3,'in_progress')").run();
     expect(getVocabularyReviewData(database,"2026-11-12").cards.map((card) => card.id)).toEqual([11,12,13]);
+    expect(getVocabularyReviewData(database,"2026-11-12").cards.map((card) => card.id)).not.toContain(14);
+    expect(recordVocabularyReview(database,14,"good","5d01dc12-87b5-4db8-88da-74ef21b777a7")).toBeNull();
+    database.exec("INSERT INTO checkpoint_attempts VALUES(2,2,1),(3,3,1)");
+    expect(getVocabularyReviewData(database,"2026-11-12").cards.map((card) => card.id)).toEqual([11,12,13,14]);
   });
   it("persists review history and ignores a duplicate idempotency key", () => {
     const database = createDatabase();

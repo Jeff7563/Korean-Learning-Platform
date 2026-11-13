@@ -12,7 +12,7 @@ import { ListeningPractice } from "@/components/listening-practice";
 import { TeacherTip } from "@/components/teacher-tip";
 import { getTeacherTip } from "@/content/teacher-tips";
 
-type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
+type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
 type Exercise = { id: number; prompt: string; options: string[] };
 type Activity = { id: number; title: string; completed: number };
 type AttemptAnswer = { exerciseId: number; position: number; prompt: string | null; options: string[]; selectedIndex: number; answerIndex: number | null; correct: number; explanation: string | null; snapshotKind: "captured" | "legacy_unverified" | null; historicalContentVerified: boolean };
@@ -152,6 +152,10 @@ export default function Learn() {
         <ListeningPractice items={listeningItems} officialAudioResource={slug === "hangul-review" ? { url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", title: "สื่อฝึกฟัง EPS-TOPIK จาก HRD Korea", description: "แหล่งเสริมสำหรับเป้าหมายสอบในระยะถัดไป · เปิดไฟล์ที่เว็บไซต์ต้นทาง" } : undefined} />
 
         <section className="lesson-content panel"><div className="lesson-content-heading"><div><p className="eyebrow">LESSON NOTES</p><h2>ทำความเข้าใจบทเรียน</h2></div><span className="content-language">한국어 · ไทย</span></div><p className="lesson-explanation">{lesson.explanation}</p><button className="examples-toggle" type="button" aria-expanded={showExamples} onClick={() => setShowExamples((value) => !value)}>ตัวอย่างประกอบ {showExamples ? <ChevronUp size={17} /> : <ChevronDown size={17} />}</button>{showExamples && <div className="lesson-examples">{lesson.examples.map((example, index) => <div className="example-line" key={`${index}-${example}`}><span>{String(index + 1).padStart(2, "0")}</span><p>{example}</p></div>)}</div>}</section>
+
+        {lesson.dialogue && <section className="panel grammar-dialogue" aria-labelledby="grammar-dialogue-title"><p className="eyebrow">IN CONTEXT</p><h2 id="grammar-dialogue-title">บทสนทนาฝึกใช้</h2><div className="dialogue-lines">{lesson.dialogue.map((line, index) => <p key={`${index}-${line.korean}`}><strong>{line.speaker}</strong><span lang="ko">{line.korean}</span><span>{line.thai}</span></p>)}</div></section>}
+        {lesson.practicePrompts && <section className="panel grammar-practice"><p className="eyebrow">SPEAK & REPEAT</p><h2>ฟังและพูดตาม</h2><ol>{lesson.practicePrompts.map((prompt) => <li key={prompt}>{prompt}</li>)}</ol></section>}
+        {lesson.commonMistakes && <section className="panel grammar-mistakes"><p className="eyebrow">COMMON MISTAKES</p><h2>จุดที่มักสับสน</h2><ul>{lesson.commonMistakes.map((mistake) => <li key={mistake}>{mistake}</li>)}</ul></section>}
 
         {teacherTip && <TeacherTip tip={teacherTip} />}
 

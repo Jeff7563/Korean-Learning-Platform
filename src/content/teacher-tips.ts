@@ -7,6 +7,7 @@ export type TeacherTipQuestion = {
 
 export type TeacherTip = {
   slug: string;
+  relatedLessonSlugs?: string[];
   title: string;
   objective: string;
   explanation: string;
@@ -27,6 +28,7 @@ export const pendingTeacherVideoUrls = [
 export const teacherTips: TeacherTip[] = [
   {
     slug: "everyday-personal-information",
+    relatedLessonSlugs: ["grammar-sentence-structure-particles", "grammar-copula"],
     title: "ถามข้อมูลให้ตรงจุด",
     objective: "เลือกคำถามพื้นฐานให้เหมาะกับข้อมูลที่ต้องการรู้",
     explanation: "คำถามภาษาเกาหลีมักวางคำถามไว้ในตำแหน่งที่คำตอบควรอยู่ในประโยคบอกเล่า แล้วลงท้ายด้วยรูปคำถามสุภาพ เช่น 요? คำถามหลักมี 뭐 (อะไร), 어디 (ที่ไหน), 누구 (ใคร), 언제 (เมื่อไร), 어떻게 (อย่างไร) และ 왜 (ทำไม) ระดับสุภาพอยู่ที่รูปลงท้ายด้วย: 뭐야? หรือ 누구야? เป็นกันเอง ใช้กับคนสนิทเท่านั้น; 뭐예요? และ 누구세요? สุภาพกว่า เหมาะกับผู้ฟังที่ไม่สนิท",
@@ -47,6 +49,7 @@ export const teacherTips: TeacherTip[] = [
   },
   {
     slug: "everyday-greetings",
+    relatedLessonSlugs: ["grammar-copula", "grammar-requests-instructions"],
     title: "วลีเอาตัวรอด แยกตามสถานการณ์",
     objective: "หยิบวลีสุภาพพื้นฐานมาใช้กับการขอความช่วยเหลือ การซื้อของ และการขอบคุณ",
     explanation: "จำวลีตามสถานการณ์แทนการท่องเป็นรายการเดียว 안녕하세요 ใช้ทักทาย; 어디에 있어요? ถามว่าสิ่งนั้นอยู่ที่ไหน; 얼마예요? ถามราคา; 다시 해 주세요 ขอให้ทำซ้ำ (ถ้าฟังคำพูดไม่ทันให้ใช้ 다시 말해 주세요); 모르겠어요 บอกว่ายังไม่ทราบหรือไม่เข้าใจ; 감사합니다 ใช้ขอบคุณ; 죄송합니다 ใช้ขอโทษ; 주세요 ใช้ขอสิ่งของหรือขอให้อีกฝ่ายทำสิ่งหนึ่ง วลีเหล่านี้ไม่ได้ใช้แทนกันทั้งหมด",
@@ -69,6 +72,7 @@ export const teacherTips: TeacherTip[] = [
   },
   {
     slug: "everyday-shopping-food-prices",
+    relatedLessonSlugs: ["grammar-wants-progressive", "grammar-requests-instructions"],
     title: "เปลี่ยนคำกริยาให้พูดได้หลายแบบ",
     objective: "สังเกตรากคำกริยาและสร้างรูปสุภาพที่ใช้บ่อยโดยไม่เหมารวมกฎ",
     explanation: "เริ่มจากตัด 다 เพื่อหารากคำ: 먹다 → 먹-. รูปปัจจุบันสุภาพคือ 먹어요; รูปกำลังทำคือ 먹고 있어요; อยากทำคือ 먹고 싶어요; ปฏิเสธแบบพื้นฐานคือ 안 먹어요 หรือ 먹지 않아요; อดีตคือ 먹었어요. การผันขึ้นกับรูปคำและข้อยกเว้น จึงควรตรวจคำใหม่ทีละคำ ไม่ใช้กฎเดียวกับทุกคำโดยไม่ตรวจ",
@@ -88,6 +92,7 @@ export const teacherTips: TeacherTip[] = [
   },
   {
     slug: "everyday-objects-sentences",
+    relatedLessonSlugs: ["grammar-sentence-structure-particles", "grammar-location-particles"],
     title: "จับโครงประโยคและหน้าที่ของคำช่วย",
     objective: "แยกประธาน หัวข้อ และกรรมในประโยคสั้น ๆ ก่อนเรียงคำ",
     explanation: "ประโยคพื้นฐานมักวางกริยาไว้ท้ายประโยค เช่น 저는 물을 마셔요 (ฉันดื่มน้ำ) 은/는 ทำเครื่องหมายหัวข้อหรือสิ่งที่กำลังกล่าวถึง; 이/가 ทำเครื่องหมายประธานที่เน้นหรือระบุว่าใคร/อะไรเป็นผู้กระทำ; 을/를 ทำเครื่องหมายกรรมที่รับการกระทำ คำช่วยมีหน้าที่ตามบริบท จึงไม่ควรจำว่า 은/는 กับ 이/가 ใช้แทนกันได้ทุกกรณี",
@@ -106,6 +111,7 @@ export const teacherTips: TeacherTip[] = [
   },
   {
     slug: "everyday-review",
+    relatedLessonSlugs: ["grammar-integrated-review"],
     title: "ใช้แบบทดสอบจัดระดับให้เป็นประโยชน์",
     objective: "ใช้ผลทดสอบเพื่อเลือกสิ่งที่จะทบทวน โดยแยกการประเมินระดับออกจากการสอบรับรอง",
     explanation: "แบบทดสอบจัดระดับช่วยประมาณว่าควรเริ่มทบทวนตรงไหน ไม่ใช่ใบรับรองหรือผลสอบ EPS-TOPIK อย่างเป็นทางการ ลองทำครั้งแรกโดยไม่เปิดคำตอบ จดว่าพลาดเรื่องใด แล้วกลับไปฝึกเนื้อหานั้นก่อนทำแบบฝึกอีกครั้ง แบบทดสอบจากแต่ละแพลตฟอร์มอาจใช้เกณฑ์และข้อสอบคนละชุด จึงไม่ควรนำคะแนนมาเทียบกันตรง ๆ",
@@ -124,5 +130,5 @@ export const teacherTips: TeacherTip[] = [
 ];
 
 export function getTeacherTip(slug: string): TeacherTip | undefined {
-  return teacherTips.find((tip) => tip.slug === slug);
+  return teacherTips.find((tip) => tip.slug === slug || tip.relatedLessonSlugs?.includes(slug));
 }
