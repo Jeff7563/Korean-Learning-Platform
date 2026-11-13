@@ -6,6 +6,8 @@ import { mediaForLesson } from "../src/content/media-catalog";
 import { getDatabasePath } from "../src/lib/database-path";
 import { publicLessonContent } from "../src/lib/public-lesson";
 import { epsExamDrafts, epsSourceDrafts } from "../src/content/eps-topik-bank";
+import { epsExamDraftsV071 } from "../src/content/eps-topik-bank-v071";
+import { seedEpsExamDrafts } from "../src/lib/eps-topik-seed";
 
 const dbPath = getDatabasePath(process.env.KOREAN_DB_PATH);
 mkdirSync(dirname(dbPath), { recursive: true });
@@ -75,19 +77,12 @@ database.transaction(() => {
     VALUES(?,?,?,?,?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,edition=excluded.edition,url=excluded.url,format=excluded.format,
     access_status=excluded.access_status,answer_audio_status=excluded.answer_audio_status,copyright_notes=excluded.copyright_notes,verification_notes=excluded.verification_notes,verified_at=excluded.verified_at`);
   for (const source of epsSourceDrafts) putSource.run(source.slug,source.title,source.edition,source.url,source.format,source.access_status,source.answer_audio_status,source.copyright_notes,source.verification_notes,"2026-11-12");
-  const putSet = database.prepare(`INSERT INTO eps_exam_sets(id,title,style,source_type,description,time_minutes,max_score)
-    VALUES(?,?,?,'ORIGINAL_MOCK',?,50,100) ON CONFLICT(id) DO UPDATE SET title=excluded.title,style=excluded.style,description=excluded.description,time_minutes=excluded.time_minutes,max_score=excluded.max_score`);
-  const putQuestion = database.prepare(`INSERT INTO eps_questions(exam_set_id,position,section,skill,prompt,options_json,answer_index,explanation_th,listening_script,source_type)
-    VALUES(?,?,?,?,?,?,?,?,?,'ORIGINAL_MOCK') ON CONFLICT(exam_set_id,position) DO UPDATE SET section=excluded.section,skill=excluded.skill,prompt=excluded.prompt,options_json=excluded.options_json,answer_index=excluded.answer_index,explanation_th=excluded.explanation_th,listening_script=excluded.listening_script,source_type=excluded.source_type`);
-  for (const exam of epsExamDrafts) {
-    putSet.run(exam.id,exam.title,exam.style,exam.description);
-    exam.questions.forEach((question,position)=>putQuestion.run(exam.id,position+1,question.section,question.skill,question.prompt,JSON.stringify(question.options),question.answer,question.explanation,question.script??null));
-  }
+  seedEpsExamDrafts(database);
 })();
 
 const after = Object.fromEntries(
   Object.keys(before).map((table) => [table, (database.prepare(`SELECT count(*) count FROM ${table}`).get() as { count: number }).count]),
 );
 const moduleRows = database.prepare(`SELECT m.slug,m.position,count(l.id) lessonCount FROM modules m LEFT JOIN lessons l ON l.module_id=m.id GROUP BY m.id ORDER BY m.position`).all();
-console.log(JSON.stringify({ seeded: curriculumModules.map((module) => ({ module: module.slug, lessons: module.lessons.length })), epsSets: epsExamDrafts.map((exam)=>({id:exam.id,count:exam.questions.length})), epsSources:epsSourceDrafts.length, before, after, modules: moduleRows }, null, 2));
+console.log(JSON.stringify({ seeded: curriculumModules.map((module) => ({ module: module.slug, lessons: module.lessons.length })), epsSets: [...epsExamDrafts.map((exam)=>({id:exam.id,count:exam.questions.length,active:false})), ...epsExamDraftsV071.map((exam)=>({id:exam.id,count:exam.questions.length,active:true}))], epsSources:epsSourceDrafts.length, before, after, modules: moduleRows }, null, 2));
 database.close();

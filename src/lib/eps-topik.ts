@@ -10,22 +10,23 @@ export function getEpsCatalog(database:Database.Database){
   const sources=database.prepare("SELECT slug,title,edition,url,format,access_status accessStatus,answer_audio_status answerAudioStatus,copyright_notes copyrightNotes,verification_notes verificationNotes,verified_at verifiedAt FROM eps_sources ORDER BY id").all();
   const exams=database.prepare(`SELECT s.id,s.title,s.style,s.source_type sourceType,s.description,s.time_minutes timeMinutes,s.max_score maxScore,
       count(q.id) questionCount,sum(CASE WHEN q.section='reading' THEN 1 ELSE 0 END) readingCount,sum(CASE WHEN q.section='listening' THEN 1 ELSE 0 END) listeningCount
-    FROM eps_exam_sets s LEFT JOIN eps_questions q ON q.exam_set_id=s.id GROUP BY s.id ORDER BY s.id`).all();
+    FROM eps_exam_sets s LEFT JOIN eps_questions q ON q.exam_set_id=s.id WHERE s.is_active=1 GROUP BY s.id ORDER BY s.id`).all();
   return {sources,exams};
 }
 
 export function getExamInfo(database:Database.Database,examSetId:string){
-  return database.prepare(`SELECT s.id,s.title,s.style,s.source_type sourceType,s.description,s.time_minutes timeMinutes,s.max_score maxScore,
+  return database.prepare(`SELECT s.id,s.title,s.style,s.source_type sourceType,s.description,s.time_minutes timeMinutes,s.max_score maxScore,s.is_active isActive,
     count(q.id) questionCount,sum(CASE WHEN q.section='reading' THEN 1 ELSE 0 END) readingCount,sum(CASE WHEN q.section='listening' THEN 1 ELSE 0 END) listeningCount
     FROM eps_exam_sets s LEFT JOIN eps_questions q ON q.exam_set_id=s.id WHERE s.id=? GROUP BY s.id`).get(examSetId) ?? null;
 }
 
 export function startExamAttempt(database:Database.Database,examSetId:string,now=new Date()):{id:number;resumed:boolean}|null{
-  const exam=getExamInfo(database,examSetId) as {questionCount:number;readingCount:number;listeningCount:number}|null;
+  const exam=getExamInfo(database,examSetId) as {questionCount:number;readingCount:number;listeningCount:number;isActive:number}|null;
   if(!exam||exam.questionCount!==40||exam.readingCount!==20||exam.listeningCount!==20)return null;
   const active=database.prepare("SELECT id,expires_at expiresAt FROM eps_attempts WHERE kind='exam' AND exam_set_id=? AND status='in_progress' ORDER BY id DESC LIMIT 1").get(examSetId) as {id:number;expiresAt:string}|undefined;
   if(active&&Date.parse(active.expiresAt)>now.valueOf())return {id:active.id,resumed:true};
   if(active)finalizeEpsAttempt(database,active.id,now);
+  if(exam.isActive!==1)return null;
   const ids=(database.prepare("SELECT id FROM eps_questions WHERE exam_set_id=? ORDER BY position").all(examSetId) as Array<{id:number}>).map(row=>row.id);
   const startedAt=utcIso(now),expiresAt=utcIso(new Date(now.valueOf()+50*60_000));
   const result=database.prepare("INSERT INTO eps_attempts(exam_set_id,kind,practice_mode,status,question_ids_json,started_at,expires_at,active_section,section_started_at) VALUES(?,'exam',NULL,'in_progress',?,?,?,'reading',?)").run(examSetId,JSON.stringify(ids),startedAt,expiresAt,startedAt);
@@ -35,7 +36,8 @@ export function startExamAttempt(database:Database.Database,examSetId:string,now
 export function startPracticeAttempt(database:Database.Database,mode:PracticeMode,count:5|10|20,now=new Date(),random=Math.random){
   const modeWhere:Record<PracticeMode,string>={reading:"q.section='reading'",listening:"q.section='listening'", "vocabulary-grammar":"q.skill IN ('vocabulary','grammar')",everyday:"q.skill='everyday'", "workplace-safety":"q.skill IN ('workplace','safety')",incorrect:"EXISTS(SELECT 1 FROM eps_attempt_answers a JOIN eps_attempts t ON t.id=a.attempt_id WHERE a.question_id=q.id AND a.selected_index<>q.answer_index AND t.status='submitted')"};
   const rows=database.prepare(`SELECT q.id,NOT EXISTS(SELECT 1 FROM eps_attempt_answers a WHERE a.question_id=q.id) unseen
-    FROM eps_questions q WHERE ${modeWhere[mode]}`).all() as Array<{id:number;unseen:number}>;
+    FROM eps_questions q JOIN eps_exam_sets s ON s.id=q.exam_set_id
+    WHERE (${modeWhere[mode]}) AND (s.is_active=0 OR ?='incorrect')`).all(mode) as Array<{id:number;unseen:number}>;
   if(!rows.length)return null;
   const unseen=shuffle(rows.filter(row=>row.unseen).map(row=>row.id),random);
   const seen=shuffle(rows.filter(row=>!row.unseen).map(row=>row.id),random);

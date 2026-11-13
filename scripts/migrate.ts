@@ -46,4 +46,12 @@ if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(epsSectionsM
     db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(epsSectionsMigration);
   })();
 }
+const epsImmutableFormsMigration = "0007_eps_immutable_exam_versions.sql";
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(epsImmutableFormsMigration)) {
+  const migrationSql = readFileSync(join(process.cwd(), "scripts", "migrations", epsImmutableFormsMigration), "utf8");
+  db.transaction(() => {
+    db.exec(migrationSql);
+    db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(epsImmutableFormsMigration);
+  })();
+}
 console.log(`Migration ready: ${dbPath}`); db.close();
