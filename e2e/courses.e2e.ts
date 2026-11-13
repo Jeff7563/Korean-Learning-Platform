@@ -11,12 +11,14 @@ test("courses page renders the curriculum without a server error", async ({ page
 
   await expect(page.locator("main h1, .shell h1").first()).toBeVisible();
   const modules = page.locator(".course-module");
-  await expect(modules).toHaveCount(3);
+  await expect(modules).toHaveCount(4);
   await expect(modules.nth(0).locator(".course-lesson-card")).toHaveCount(10);
   await expect(modules.nth(1).locator(".course-lesson-card")).toHaveCount(10);
   await expect(modules.nth(2).locator(".course-lesson-card")).toHaveCount(10);
+  await expect(modules.nth(3).locator(".course-lesson-card")).toHaveCount(10);
   await expect(modules.nth(0).getByRole("heading", { name: "Hangul Foundation" })).toBeVisible();
   await expect(modules.nth(1).getByRole("heading", { name: "Everyday Korean" })).toBeVisible();
   await expect(modules.nth(2).getByRole("heading", { name: "Korean Grammar" })).toBeVisible();
+  await expect(modules.nth(3).getByRole("heading", { name: "Workplace Korean" })).toBeVisible();
   expect(serverErrors).toEqual([]);
 });

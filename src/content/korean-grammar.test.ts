@@ -7,7 +7,7 @@ import { publicLessonContent } from "../lib/public-lesson";
 describe("Korean Grammar module", () => {
   it("adds ten complete lessons and fifty main checkpoint questions as module three", () => {
     expect(curriculumModules.map(({ slug, position, lessons }) => [slug, position, lessons.length])).toEqual([
-      ["hangul-foundation", 1, 10], ["everyday-korean", 2, 10], ["korean-grammar", 3, 10],
+      ["hangul-foundation", 1, 10], ["everyday-korean", 2, 10], ["korean-grammar", 3, 10], ["workplace-korean", 4, 10],
     ]);
     expect(koreanGrammarLessons.reduce((sum, lesson) => sum + lesson.questions.length, 0)).toBe(50);
     for (const lesson of koreanGrammarLessons) {
@@ -36,5 +36,6 @@ describe("Korean Grammar module", () => {
     expect(getTeacherTip("everyday-greetings")?.slug).toBe("everyday-greetings");
     expect(getTeacherTip("grammar-copula")?.slug).toBe("everyday-personal-information");
     expect(getTeacherTip("grammar-integrated-review")?.slug).toBe("everyday-review");
+    expect(getTeacherTip("workplace-clarification")?.slug).toBe("everyday-personal-information");
   });
 });

@@ -28,7 +28,7 @@ export const pendingTeacherVideoUrls = [
 export const teacherTips: TeacherTip[] = [
   {
     slug: "everyday-personal-information",
-    relatedLessonSlugs: ["grammar-sentence-structure-particles", "grammar-copula"],
+    relatedLessonSlugs: ["grammar-sentence-structure-particles", "grammar-copula", "workplace-clarification"],
     title: "ถามข้อมูลให้ตรงจุด",
     objective: "เลือกคำถามพื้นฐานให้เหมาะกับข้อมูลที่ต้องการรู้",
     explanation: "คำถามภาษาเกาหลีมักวางคำถามไว้ในตำแหน่งที่คำตอบควรอยู่ในประโยคบอกเล่า แล้วลงท้ายด้วยรูปคำถามสุภาพ เช่น 요? คำถามหลักมี 뭐 (อะไร), 어디 (ที่ไหน), 누구 (ใคร), 언제 (เมื่อไร), 어떻게 (อย่างไร) และ 왜 (ทำไม) ระดับสุภาพอยู่ที่รูปลงท้ายด้วย: 뭐야? หรือ 누구야? เป็นกันเอง ใช้กับคนสนิทเท่านั้น; 뭐예요? และ 누구세요? สุภาพกว่า เหมาะกับผู้ฟังที่ไม่สนิท",

@@ -5,7 +5,7 @@ import { lessonMediaCatalog } from "./media-catalog";
 describe("curated lesson media", () => {
   it("keeps each linked curriculum resource directly attributed and verified", () => {
     const allLessons = curriculumModules.flatMap((module) => module.lessons);
-    expect(allLessons).toHaveLength(30);
+    expect(allLessons).toHaveLength(40);
     expect(Object.keys(lessonMediaCatalog).every((slug) => allLessons.some((lesson) => lesson.slug === slug))).toBe(true);
     for (const resources of Object.values(lessonMediaCatalog)) {
       for (const resource of resources) {

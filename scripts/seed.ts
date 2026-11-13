@@ -25,37 +25,85 @@ database.transaction(() => {
   ).get("korean-foundations", "Korean Learning Platform") as { id: number };
 
   const putModule = database.prepare(
-    "INSERT INTO modules(course_id,slug,title,position) VALUES(?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,position=excluded.position RETURNING id",
+    "INSERT INTO modules(course_id,slug,title,position) VALUES(?,?,?,?) ON CONFLICT(slug) DO NOTHING",
   );
+  const getModule = database.prepare("SELECT id,title,position FROM modules WHERE slug=?");
   const putHangulLesson = database.prepare(
     "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO NOTHING",
   );
   const putEverydayLesson = database.prepare(
-    "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,description=excluded.description,content_json=excluded.content_json",
+    "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO NOTHING",
   );
   const putGrammarLesson = database.prepare(
     "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO NOTHING",
   );
+  const putWorkplaceLesson = database.prepare(
+    "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO NOTHING",
+  );
+  const getLesson = database.prepare("SELECT id,module_id,title,description,content_json,position FROM lessons WHERE slug=?");
   const putExercise = database.prepare(
     "INSERT INTO exercises(lesson_id,position,prompt,options_json,answer_index,explanation) SELECT id,?,?,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,position) DO NOTHING",
   );
   const getExercise = database.prepare(`SELECT e.prompt,e.options_json,e.answer_index,e.explanation
     FROM exercises e JOIN lessons l ON l.id=e.lesson_id WHERE l.slug=? AND e.position=?`);
   const putActivity = database.prepare(
-    "INSERT INTO lesson_activities(lesson_id,slug,title,position) SELECT id,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,slug) DO UPDATE SET title=excluded.title,position=excluded.position",
+    "INSERT INTO lesson_activities(lesson_id,slug,title,position) SELECT id,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,slug) DO NOTHING",
   );
+  const getActivity = database.prepare("SELECT title,position FROM lesson_activities WHERE lesson_id=(SELECT id FROM lessons WHERE slug=?) AND slug=?");
   const putVocabulary = database.prepare(
-    "INSERT INTO vocabulary(lesson_id,korean,thai) SELECT id,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,korean) DO UPDATE SET thai=excluded.thai",
+    "INSERT INTO vocabulary(lesson_id,korean,thai) SELECT id,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,korean) DO NOTHING",
   );
+  const getVocabulary = database.prepare("SELECT thai FROM vocabulary WHERE lesson_id=(SELECT id FROM lessons WHERE slug=?) AND korean=?");
   const putResource = database.prepare(
     "INSERT INTO lesson_resources(lesson_id,kind,title,url,external_id,creator,metadata_json) SELECT id,?,?,?,?,?,? FROM lessons WHERE slug=? AND NOT EXISTS(SELECT 1 FROM lesson_resources WHERE lesson_id=lessons.id AND external_id=?)",
   );
 
   for (const curriculumModule of curriculumModules) {
-    const moduleRow = putModule.get(course.id, curriculumModule.slug, curriculumModule.title, curriculumModule.position) as { id: number };
+    putModule.run(course.id, curriculumModule.slug, curriculumModule.title, curriculumModule.position);
+    const moduleRow = getModule.get(curriculumModule.slug) as { id: number; title: string; position: number } | undefined;
+    if (!moduleRow || moduleRow.title !== curriculumModule.title || moduleRow.position !== curriculumModule.position) {
+      throw new Error(`Module drift at ${curriculumModule.slug}; refusing to rewrite the published course sequence.`);
+    }
     for (const [index, lesson] of curriculumModule.lessons.entries()) {
-      const writeLesson = curriculumModule.slug === "hangul-foundation" ? putHangulLesson : curriculumModule.slug === "korean-grammar" ? putGrammarLesson : putEverydayLesson;
-      writeLesson.run(moduleRow.id, lesson.slug, lesson.title, lesson.description, JSON.stringify(publicLessonContent(lesson)), index + 1);
+      const writeLesson = curriculumModule.slug === "hangul-foundation" ? putHangulLesson
+        : curriculumModule.slug === "korean-grammar" ? putGrammarLesson
+          : curriculumModule.slug === "workplace-korean" ? putWorkplaceLesson : putEverydayLesson;
+      const contentJson = JSON.stringify(publicLessonContent(lesson));
+      writeLesson.run(moduleRow.id, lesson.slug, lesson.title, lesson.description, contentJson, index + 1);
+      const storedLesson = getLesson.get(lesson.slug) as { id: number; module_id: number; title: string; description: string; content_json: string; position: number } | undefined;
+      if (!storedLesson || storedLesson.module_id !== moduleRow.id || storedLesson.title !== lesson.title || storedLesson.description !== lesson.description || storedLesson.position !== index + 1) {
+        throw new Error(`Lesson metadata drift at ${lesson.slug}; refusing to rewrite a published lesson.`);
+      }
+      let storedContent = JSON.parse(storedLesson.content_json) as Record<string, unknown>;
+      const expectedContent = JSON.parse(contentJson) as Record<string, unknown>;
+
+      // Historical Hangul seed content also copied its video into content_json;
+      // the current allowlisted lesson API uses lesson_resources instead.
+      if (lesson.slug === "hangul-intro" && storedContent.video) {
+        const storedVideo = storedContent.video;
+        delete storedContent.video;
+        if (JSON.stringify(storedVideo) !== JSON.stringify(lesson.video)) {
+          throw new Error("Unexpected media drift at hangul-intro; refusing to change the published lesson.");
+        }
+      }
+
+      // Apply only the approved V0.9 grammar explanation correction. The update
+      // changes no exercise rows, answer keys, attempts, or checkpoint snapshots.
+      if (lesson.slug === "grammar-sentence-structure-particles" && JSON.stringify(storedContent) !== JSON.stringify(expectedContent)) {
+        const legacyContent = { ...expectedContent, commonMistakes: [
+          "อย่าจำว่า 은/는 คือประธานเสมอ: เป็นคำช่วยหัวข้อและใช้เปรียบต่างได้",
+          "อย่าวางกริยาก่อนกรรมในประโยคพื้นฐาน: 자연한 순서는 저는 밥을 먹어요",
+          "เลือก 은/는, 이/가, 을/를 จากตัวสะกดท้ายคำนาม ไม่ใช่จากความหมาย",
+        ] };
+        if (JSON.stringify(storedContent) !== JSON.stringify(legacyContent)) {
+          throw new Error("Unexpected grammar lesson drift; refusing to update published content.");
+        }
+        database.prepare("UPDATE lessons SET content_json=? WHERE id=?").run(contentJson, storedLesson.id);
+        storedContent = expectedContent;
+      }
+      if (JSON.stringify(storedContent) !== JSON.stringify(expectedContent)) {
+        throw new Error(`Lesson content drift at ${lesson.slug}; refusing to overwrite published content.`);
+      }
       for (const [questionIndex, exercise] of lesson.questions.entries()) {
         const position = questionIndex + 1;
         putExercise.run(position, exercise.prompt, JSON.stringify(exercise.options), exercise.answer, exercise.explanation, lesson.slug);
@@ -66,8 +114,18 @@ database.transaction(() => {
       }
       for (const [activityIndex, activity] of lesson.activities.entries()) {
         putActivity.run(`activity-${activityIndex + 1}`, activity, activityIndex + 1, lesson.slug);
+        const savedActivity = getActivity.get(lesson.slug, `activity-${activityIndex + 1}`) as { title: string; position: number } | undefined;
+        if (!savedActivity || savedActivity.title !== activity || savedActivity.position !== activityIndex + 1) {
+          throw new Error(`Activity drift at ${lesson.slug} activity ${activityIndex + 1}; refusing to rewrite learner activity labels.`);
+        }
       }
-      for (const word of lesson.vocabulary) putVocabulary.run(word.korean, word.thai, lesson.slug);
+      for (const word of lesson.vocabulary) {
+        putVocabulary.run(word.korean, word.thai, lesson.slug);
+        const savedWord = getVocabulary.get(lesson.slug, word.korean) as { thai: string } | undefined;
+        if (!savedWord || savedWord.thai !== word.thai) {
+          throw new Error(`Vocabulary drift at ${lesson.slug} word ${word.korean}; refusing to rewrite published vocabulary.`);
+        }
+      }
       if (curriculumModule.slug === "hangul-foundation") {
         if (lesson.video) putResource.run("youtube", lesson.video.title, lesson.video.url, lesson.video.id, lesson.video.creator,
           JSON.stringify({ embedUrl: `https://www.youtube-nocookie.com/embed/${lesson.video.id}` }), lesson.slug, lesson.video.id);

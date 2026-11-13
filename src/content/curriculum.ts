@@ -1,6 +1,7 @@
 export type Question = { prompt: string; options: string[]; answer: number; explanation: string };
 import { everydayKoreanLessons } from "./everyday-korean";
 import { koreanGrammarLessons } from "./korean-grammar";
+import { workplaceKoreanLessons } from "./workplace-korean";
 
 export type Lesson = { slug: string; title: string; description: string; objectives: string[]; explanation: string; examples: string[]; activities: string[]; questions: Question[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; video?: { id: string; url: string; creator: string; title: string } };
 const q = (prompt: string, options: string[], answer: number, explanation: string): Question => ({ prompt, options, answer, explanation });
@@ -20,6 +21,7 @@ export const curriculumModules = [
   { slug: "hangul-foundation", title: "Hangul Foundation", position: 1, lessons },
   { slug: "everyday-korean", title: "Everyday Korean", position: 2, lessons: everydayKoreanLessons },
   { slug: "korean-grammar", title: "Korean Grammar", position: 3, lessons: koreanGrammarLessons },
+  { slug: "workplace-korean", title: "Workplace Korean", position: 4, lessons: workplaceKoreanLessons },
 ] as const;
 
 export const phases = curriculumModules.map((module) => module.title);
