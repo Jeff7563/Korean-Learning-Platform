@@ -31,17 +31,19 @@ test("Korean Grammar unlocks after the first twenty lessons and leads into Workp
 
   const initialCoursesApi = await request.get("/api/courses");
   expect(initialCoursesApi.status(), await initialCoursesApi.text()).toBe(200);
-  expect((await initialCoursesApi.json()).modules).toHaveLength(4);
+  expect((await initialCoursesApi.json()).modules).toHaveLength(5);
   const coursesResponse = await page.goto("/courses");
   expect(coursesResponse?.status()).toBe(200);
   await expect(page.getByRole("heading", { name: "Hangul Foundation" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Everyday Korean" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Korean Grammar" })).toBeVisible();
   await expect(page.getByRole("heading", { name: "Workplace Korean" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "EPS-TOPIK Preparation" })).toBeVisible();
   await expect(page.locator(".course-module").nth(0).locator(".course-lesson-card")).toHaveCount(10);
   await expect(page.locator(".course-module").nth(1).locator(".course-lesson-card")).toHaveCount(10);
   await expect(page.locator(".course-module").nth(2).locator(".course-lesson-card")).toHaveCount(10);
   await expect(page.locator(".course-module").nth(3).locator(".course-lesson-card")).toHaveCount(10);
+  await expect(page.locator(".course-module").nth(4).locator(".course-lesson-card")).toHaveCount(10);
   await expect(page.locator('.course-lesson-card[href="#"]').first()).toContainText("ล็อก");
   expect((await request.get("/api/lessons/everyday-greetings")).status()).toBe(403);
   expect((await request.get("/api/lessons/grammar-sentence-structure-particles")).status()).toBe(403);
@@ -115,7 +117,7 @@ test("Korean Grammar unlocks after the first twenty lessons and leads into Workp
 
   for (const lesson of curriculumModules[1].lessons) await passLesson(request, lesson);
   const afterEveryday = await (await request.get("/api/courses")).json();
-  expect(afterEveryday).toMatchObject({ completed: 20, total: 40 });
+  expect(afterEveryday).toMatchObject({ completed: 20, total: 50 });
   expect(afterEveryday.modules[2].lessons[0].status).toBe("available");
   expect(afterEveryday.modules[2].lessons[1].status).toBe("locked");
   expect(afterEveryday.modules[3].lessons[0].status).toBe("locked");
@@ -148,7 +150,7 @@ test("Korean Grammar unlocks after the first twenty lessons and leads into Workp
   await page.screenshot({ path: resolve(grammarScreenshots, "grammar-module-progress-mobile.png"), fullPage: true });
   for (const lesson of curriculumModules[2].lessons) await passLesson(request, lesson);
   const complete = await (await request.get("/api/courses")).json();
-  expect(complete).toMatchObject({ completed: 30, total: 40, percent: 75 });
+  expect(complete).toMatchObject({ completed: 30, total: 50, percent: 60 });
   expect(complete.modules[1]).toMatchObject({ completed: 10, total: 10, percent: 100 });
   expect(complete.modules[2]).toMatchObject({ completed: 10, total: 10, percent: 100 });
   expect(complete.modules[3].lessons[0].status).toBe("available");
@@ -169,5 +171,5 @@ test("Korean Grammar unlocks after the first twenty lessons and leads into Workp
   expect(dashboardMobile.scroll).toBeLessThanOrEqual(dashboardMobile.width);
 
   await page.goto("/courses");
-  await expect(page.locator(".course-overview")).toContainText("30 จาก 40 บทเรียน");
+  await expect(page.locator(".course-overview")).toContainText("30 จาก 50 บทเรียน");
 });

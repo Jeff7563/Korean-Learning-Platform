@@ -29,7 +29,7 @@ export default function Courses() {
     </section>}
     {error && <p role="alert" className="notice error-notice">โหลดหลักสูตรไม่สำเร็จ กรุณาลองใหม่อีกครั้ง</p>}
     {!data && !error && <p role="status" className="card">กำลังโหลดหลักสูตร…</p>}
-    {data?.modules.map((module) => <section key={module.slug} className="card course-module" aria-labelledby={`module-${module.slug}`}>
+    {data?.modules.map((module) => <section id={`module-${module.slug}`} key={module.slug} className="card course-module" aria-labelledby={`module-${module.slug}`}>
       <div className="course-module-heading">
         <span className="badge">โมดูล {module.position}</span>
         <h2 id={`module-${module.slug}`}>{module.title}</h2>

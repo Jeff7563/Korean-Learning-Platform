@@ -44,11 +44,12 @@ test("completes the workplace learning path and captures desktop/mobile evidence
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/courses");
   const modules = page.locator(".course-module");
-  await expect(modules).toHaveCount(4);
+  await expect(modules).toHaveCount(5);
   await expect(modules.nth(3).getByRole("heading", { name: "Workplace Korean" })).toBeVisible();
   await expect(modules.nth(3).locator(".course-lesson-card")).toHaveCount(10);
   await expect(modules.nth(3).locator(".course-lesson-card").first()).toContainText("พร้อมเรียน");
-  await page.screenshot({ path: resolve(screenshots, "courses-four-modules.png"), fullPage: true });
+  await expect(modules.nth(4).getByRole("heading", { name: "EPS-TOPIK Preparation" })).toBeVisible();
+  await page.screenshot({ path: resolve(screenshots, "courses-five-modules.png"), fullPage: true });
 
   const firstWorkplaceLesson = lessons[30];
   await page.goto(`/learn/${firstWorkplaceLesson.slug}`);
@@ -90,9 +91,9 @@ test("completes the workplace learning path and captures desktop/mobile evidence
   await page.screenshot({ path: resolve(screenshots, "lesson-40-checkpoint-result.png"), fullPage: true });
 
   const completed = await (await request.get("/api/courses")).json();
-  expect(completed).toMatchObject({ completed: 40, total: 40, percent: 100 });
+  expect(completed).toMatchObject({ completed: 40, total: 50, percent: 80 });
   expect(completed.modules[3]).toMatchObject({ slug: "workplace-korean", completed: 10, total: 10, percent: 100 });
   await page.goto("/courses");
-  await expect(page.getByRole("region", { name: "ความคืบหน้าหลักสูตร" })).toContainText("40 จาก 40 บทเรียน");
+  await expect(page.getByRole("region", { name: "ความคืบหน้าหลักสูตร" })).toContainText("40 จาก 50 บทเรียน");
   await page.screenshot({ path: resolve(screenshots, "workplace-module-complete.png"), fullPage: true });
 });

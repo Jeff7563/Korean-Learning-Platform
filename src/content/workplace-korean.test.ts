@@ -4,15 +4,16 @@ import { workplaceKoreanLessons } from "./workplace-korean";
 import { publicLessonContent } from "../lib/public-lesson";
 
 describe("Workplace Korean module", () => {
-  it("adds lessons 31–40 as module four with 50 main checkpoints", () => {
+  it("keeps Workplace Korean at lessons 31–40 and adds a fifth module", () => {
     expect(curriculumModules.map(({ slug, position, lessons }) => [slug, position, lessons.length])).toEqual([
       ["hangul-foundation", 1, 10],
       ["everyday-korean", 2, 10],
       ["korean-grammar", 3, 10],
       ["workplace-korean", 4, 10],
+      ["eps-topik-preparation", 5, 10],
     ]);
-    expect(curriculumModules.flatMap(({ lessons }) => lessons)).toHaveLength(40);
-    expect(curriculumModules.flatMap(({ lessons }) => lessons).reduce((sum, lesson) => sum + lesson.questions.length, 0)).toBe(200);
+    expect(curriculumModules.flatMap(({ lessons }) => lessons)).toHaveLength(50);
+    expect(curriculumModules.flatMap(({ lessons }) => lessons).reduce((sum, lesson) => sum + lesson.questions.length, 0)).toBe(250);
     expect(workplaceKoreanLessons.map(({ slug }) => slug)).toEqual([
       "workplace-respectful-greetings", "workplace-schedules-attendance", "workplace-locations-departments",
       "workplace-tools-equipment", "workplace-instructions", "workplace-clarification",

@@ -12,7 +12,7 @@ import { ListeningPractice } from "@/components/listening-practice";
 import { TeacherTip } from "@/components/teacher-tip";
 import { getTeacherTip } from "@/content/teacher-tips";
 
-type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
+type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; epsPractice?: { mode: string; href: string }[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
 type Exercise = { id: number; prompt: string; options: string[] };
 type Activity = { id: number; title: string; completed: number };
 type AttemptAnswer = { exerciseId: number; position: number; prompt: string | null; options: string[]; selectedIndex: number; answerIndex: number | null; correct: number; explanation: string | null; snapshotKind: "captured" | "legacy_unverified" | null; historicalContentVerified: boolean };
@@ -148,6 +148,8 @@ export default function Learn() {
         </section>
 
         <LessonMedia resources={lesson.videoResources ?? []} />
+
+        {lesson.epsPractice && <section className="panel eps-lesson-practice" aria-labelledby="eps-practice-title"><p className="eyebrow">PRACTICE CONNECTION</p><h2 id="eps-practice-title">ฝึกต่อใน EPS-TOPIK Practice</h2><p>แบบฝึกและข้อสอบจำลองเป็นต้นฉบับเพื่อการฝึก ไม่ใช่ข้อสอบจริงหรือการรับรองผลสอบ</p><div className="eps-actions">{lesson.epsPractice.map((practice) => <Link className="btn secondary" href={practice.href} key={practice.mode}>ฝึก{practice.mode === "reading" ? "การอ่าน" : practice.mode === "listening" ? "การฟัง" : practice.mode === "vocabulary-grammar" ? "คำศัพท์และไวยากรณ์" : practice.mode === "workplace-safety" ? "ที่ทำงานและความปลอดภัย" : practice.mode === "incorrect" ? "ข้อที่เคยตอบผิด" : "ชีวิตประจำวัน"}</Link>)}</div></section>}
 
         <ListeningPractice items={listeningItems} officialAudioResource={slug === "hangul-review" ? { url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", title: "สื่อฝึกฟัง EPS-TOPIK จาก HRD Korea", description: "แหล่งเสริมสำหรับเป้าหมายสอบในระยะถัดไป · เปิดไฟล์ที่เว็บไซต์ต้นทาง" } : undefined} />
 

@@ -53,7 +53,7 @@ test("daily planner navigation, task persistence, and responsive learning flow",
   expect(plan.plannedMinutes).toBe(90);
   expect(plan.tasks.map((task: { href: string }) => task.href)).toEqual([
     `/learn/${plan.lesson.slug}#vocabulary`,
-    `/learn/${plan.lesson.slug}#video`,
+    `/learn/${plan.lesson.slug}#lesson-activities`,
     `/learn/${plan.lesson.slug}#listening`,
     "/dashboard#daily-plan",
     `/learn/${plan.lesson.slug}#lesson-activities`,

@@ -182,6 +182,21 @@ export const lessonMediaCatalog: Record<string, LessonMediaResource[]> = {
     epsTextbookListing,
     hrdThaiTextbook("hrd-thai-review", "หนังสือภาษาไทยฉบับเดิมเป็นแหล่งฝึกเสริม มีบทสนทนาในชีวิตประจำวันและแบบฝึกฟัง; เป็นเนื้อหาสำหรับบริบทแรงงาน จึงไม่แทนหลักสูตรผู้เริ่มต้นทั่วไป"),
   ],
+  "eps-exam-structure-strategy": [
+    { id: "hrd-eps-test-description", kind: "article", title: "What is EPS-TOPIK? — Test duration and structure", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/abot/exam/selectTopikDesc.do?lang=en", language: "en", summary: "หน้าเกณฑ์ทางการระบุ 40 ข้อ รวม 50 นาที แบ่ง Reading 20 ข้อและ Listening 20 ข้อ ส่วนละ 25 นาที ใช้เป็นข้อมูลอ้างอิงและตรวจประกาศล่าสุดก่อนสอบ", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจหน้า EPS-TOPIK ทางการโดยตรง" } },
+    { id: "hrd-eps-testing-criteria", kind: "article", title: "EPS-TOPIK Testing Module criteria", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/abot/exam/selectStandardDesc.do?lang=en", language: "en", summary: "เกณฑ์สาธารณะครอบคลุมคำศัพท์/ไวยากรณ์ ข้อมูลใช้งาน ป้ายความปลอดภัย และการฟังบทสนทนา ไม่ใช่คลังข้อสอบจริง", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจหน้าเกณฑ์การอ่านและการฟังทางการโดยตรง" } },
+  ],
+  "eps-signs-notices-labels": [
+    { id: "hrd-eps-public-samples-reading", kind: "article", title: "EPS-TOPIK public sample catalog", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/pub/publicBookReading.do?lang=en", language: "en", summary: "รายการสื่อฝึกสาธารณะจาก HRD Korea; แอปเชื่อมไปยังแหล่งต้นทางเท่านั้น ไม่คัดลอกโจทย์หรือภาพ", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจหน้ารายการข้ออ่านสาธารณะทางการ" } },
+    { id: "hrd-eps-new-textbook", kind: "article", title: "EPS-TOPIK NEW Standard Korean textbooks and audio catalog", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", language: "en", summary: "แคตตาล็อกทางการของหนังสือมาตรฐานฉบับปี 2024 และไฟล์เสียง; แสดงประกาศแก้ไขบางส่วนในมิถุนายน 2026 หนังสือ/เสียงยังอยู่ภายนอกและไม่ถูกคัดลอก", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจแคตตาล็อกทางการและประกาศแก้ไขปี 2026" } },
+  ],
+  "eps-listening-numbers-dates": [
+    { id: "hrd-eps-new-textbook-audio", kind: "article", title: "Official EPS-TOPIK textbook and listening audio catalog", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", language: "en", summary: "หน้ารายการทางการเชื่อมหนังสือและไฟล์เสียง; ไฟล์เสียงมีลิขสิทธิ์/เงื่อนไขจากแหล่งต้นทาง ไม่ได้นำมา rehost ในแพลตฟอร์ม", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจรายการหนังสือและเสียงภาษาเกาหลีทางการ" } },
+  ],
+  "eps-integrated-review": [
+    { id: "hrd-eps-test-description-final", kind: "article", title: "EPS-TOPIK official test description", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/abot/exam/selectTopikDesc.do?lang=en", language: "en", summary: "ตรวจโครงสร้าง เวลา และเกณฑ์การคัดเลือกจากหน้า HRD Korea ก่อนวางแผนสอบจริง; mock score ในแอปไม่ใช่การรับรองผล", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจหน้าคำอธิบายการสอบทางการ" } },
+    { id: "hrd-eps-textbook-corrections", kind: "article", title: "Updated Standard Korean textbooks and listening audio", creator: "HRD Korea · EPS-TOPIK", url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", language: "en", summary: "แคตตาล็อกแสดงประกาศแก้ไขหนังสือมาตรฐานเล่ม 2 ในมิถุนายน 2026; เนื้อหาไฟล์แนบยังไม่ได้ตรวจสอบทีละหน้า", verification: { status: "verified", checkedAt: "2026-11-13", method: "ตรวจหน้าแคตตาล็อกและประกาศที่แสดงวันที่แก้ไข" } },
+  ],
 };
 
 export function mediaForLesson(slug: string): LessonMediaResource[] {
@@ -199,4 +214,14 @@ export const listeningItemsByLesson: Record<string, Array<{ korean: string; thai
   "batchim-intro": [{ korean: "간", thai: "ตัวสะกด ㄴ" }, { korean: "감", thai: "ตัวสะกด ㅁ" }, { korean: "강", thai: "ตัวสะกด ㅇ" }],
   "reading-practice": [{ korean: "사과", thai: "แอปเปิล" }, { korean: "바다", thai: "ทะเล" }, { korean: "사람", thai: "คน" }],
   "hangul-review": [{ korean: "한글", thai: "อักษรเกาหลี" }, { korean: "사람", thai: "คน" }, { korean: "한국", thai: "ประเทศเกาหลี" }],
+  "eps-exam-structure-strategy": [{ korean: "시험은 읽기와 듣기로 나뉘어요.", thai: "ข้อสอบแบ่งเป็นการอ่านและการฟัง" }, { korean: "읽기 20문제를 25분 동안 풀어요.", thai: "ทำข้ออ่าน 20 ข้อใน 25 นาที" }, { korean: "점수는 연습 결과예요.", thai: "คะแนนนี้เป็นผลการฝึก" }],
+  "eps-signs-notices-labels": [{ korean: "안전모를 착용하세요.", thai: "กรุณาสวมหมวกนิรภัย" }, { korean: "출입 금지", thai: "ห้ามเข้า" }, { korean: "미끄럼 주의", thai: "ระวังพื้นลื่น" }],
+  "eps-forms-schedules-tables": [{ korean: "오전 여덟 시에 시작해요.", thai: "เริ่มตอนแปดโมงเช้า" }, { korean: "일요일은 쉬어요.", thai: "วันอาทิตย์หยุด" }, { korean: "수량은 열두 개예요.", thai: "จำนวนสิบสองชิ้น" }],
+  "eps-messages-passages": [{ korean: "오늘 오후 세 시에 회의가 있습니다.", thai: "วันนี้มีประชุมบ่ายสามโมง" }, { korean: "자료를 가져오세요.", thai: "กรุณานำเอกสารมา" }, { korean: "도착하면 연락해 주세요.", thai: "เมื่อถึงแล้วกรุณาติดต่อมา" }],
+  "eps-vocabulary-grammar-context": [{ korean: "저는 물을 마셔요.", thai: "ฉันดื่มน้ำ" }, { korean: "공장에 가요.", thai: "ไปโรงงาน" }, { korean: "안전모를 써요.", thai: "สวมหมวกนิรภัย" }],
+  "eps-safety-instructions": [{ korean: "작업 전에 보호구를 확인하세요.", thai: "กรุณาตรวจอุปกรณ์ป้องกันก่อนทำงาน" }, { korean: "비상구 앞에 물건을 두면 안 됩니다.", thai: "ห้ามวางของหน้าทางออกฉุกเฉิน" }, { korean: "위험하면 즉시 알리세요.", thai: "หากมีอันตรายให้แจ้งทันที" }],
+  "eps-listening-numbers-dates": [{ korean: "세 시 십오 분", thai: "สามโมงสิบห้านาที" }, { korean: "오월 십일", thai: "วันที่ 11 พฤษภาคม" }, { korean: "사과 세 개", thai: "แอปเปิลสามผล" }],
+  "eps-listening-everyday-dialogues": [{ korean: "어디에서 만날까요?", thai: "เราจะพบกันที่ไหนดี?" }, { korean: "역 앞에서 만나요.", thai: "พบกันหน้าสถานี" }, { korean: "네, 세 시에 만나요.", thai: "ได้ พบกันตอนสามโมง" }],
+  "eps-listening-workplace-situations": [{ korean: "먼저 전원을 확인하세요.", thai: "กรุณาตรวจสอบไฟฟ้าก่อน" }, { korean: "확인한 후에 상자를 옮기겠습니다.", thai: "หลังตรวจแล้วจะย้ายกล่อง" }, { korean: "문제가 있으면 관리자에게 알리세요.", thai: "หากมีปัญหาให้แจ้งผู้ดูแล" }],
+  "eps-integrated-review": [{ korean: "먼저 약한 부분을 연습해요.", thai: "ฝึกจุดที่ยังไม่แข็งแรงก่อน" }, { korean: "틀린 답을 확인하고 다시 풀어요.", thai: "ตรวจคำตอบที่ผิดแล้วลองทำอีกครั้ง" }, { korean: "모의시험 점수는 참고 자료예요.", thai: "คะแนนสอบจำลองเป็นข้อมูลประกอบ" }],
 };

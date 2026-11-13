@@ -14,6 +14,10 @@ const PublicLessonSchema = z.object({
   dialogue: z.array(z.object({ speaker: z.string(), korean: z.string(), thai: z.string() })).optional(),
   practicePrompts: z.array(z.string()).optional(),
   commonMistakes: z.array(z.string()).optional(),
+  epsPractice: z.array(z.object({
+    mode: z.enum(["reading", "listening", "vocabulary-grammar", "everyday", "workplace-safety", "incorrect"]),
+    href: z.string().regex(/^\/eps-topik\/practice\?mode=(reading|listening|vocabulary-grammar|everyday|workplace-safety|incorrect)$/),
+  })).optional(),
 });
 
 export type PublicLesson = z.infer<typeof PublicLessonSchema>;

@@ -56,10 +56,10 @@ describe("curriculum seeding", () => {
     expect(database.prepare("SELECT id,slug FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all()).toEqual(lessonIds);
     expect(database.prepare("SELECT id,slug,title,description,content_json,position,module_id FROM lessons WHERE slug NOT LIKE 'grammar-%' ORDER BY id").all()).toEqual(originalLessons);
     expect(database.prepare("SELECT e.id,e.lesson_id,e.position,e.prompt,e.options_json,e.answer_index,e.explanation FROM exercises e JOIN lessons l ON l.id=e.lesson_id WHERE l.slug NOT LIKE 'grammar-%' ORDER BY e.id").all()).toEqual(originalExercises);
-    expect(database.prepare("SELECT count(*) count FROM lessons").get()).toEqual({ count: 40 });
-    expect(database.prepare("SELECT count(*) count FROM exercises").get()).toEqual({ count: 200 });
+    expect(database.prepare("SELECT count(*) count FROM lessons").get()).toEqual({ count: 50 });
+    expect(database.prepare("SELECT count(*) count FROM exercises").get()).toEqual({ count: 250 });
     expect(database.prepare("SELECT slug,position,(SELECT count(*) FROM lessons WHERE module_id=modules.id) lessons FROM modules ORDER BY position").all()).toEqual([
-      { slug: "hangul-foundation", position: 1, lessons: 10 }, { slug: "everyday-korean", position: 2, lessons: 10 }, { slug: "korean-grammar", position: 3, lessons: 10 }, { slug: "workplace-korean", position: 4, lessons: 10 },
+      { slug: "hangul-foundation", position: 1, lessons: 10 }, { slug: "everyday-korean", position: 2, lessons: 10 }, { slug: "korean-grammar", position: 3, lessons: 10 }, { slug: "workplace-korean", position: 4, lessons: 10 }, { slug: "eps-topik-preparation", position: 5, lessons: 10 },
     ]);
     expect(database.prepare("SELECT id FROM vocabulary WHERE lesson_id=? ORDER BY id LIMIT 1").get(lessonId)).toEqual({ id:vocabularyId });
     expect(database.pragma("integrity_check")).toEqual([{ integrity_check: "ok" }]);

@@ -17,6 +17,8 @@ function createDb() {
     CREATE TABLE checkpoint_attempts(id INTEGER PRIMARY KEY,lesson_id INTEGER,score INTEGER,total INTEGER,passed INTEGER,created_at TEXT DEFAULT CURRENT_TIMESTAMP);
     CREATE TABLE exercises(id INTEGER PRIMARY KEY,lesson_id INTEGER,position INTEGER,prompt TEXT,explanation TEXT);
     CREATE TABLE checkpoint_answers(id INTEGER PRIMARY KEY,attempt_id INTEGER,exercise_id INTEGER,correct INTEGER);
+    CREATE TABLE checkpoint_answer_snapshots(attempt_id INTEGER,exercise_id INTEGER,prompt TEXT,options_json TEXT,answer_index INTEGER,explanation TEXT,snapshot_kind TEXT);
+    CREATE TABLE lesson_resources(id INTEGER PRIMARY KEY,lesson_id INTEGER,kind TEXT,metadata_json TEXT);
   `);
   database.exec("INSERT INTO courses VALUES(1,'course','Course'); INSERT INTO modules VALUES(1,1,'module-one','Module One',1);");
   database.prepare("INSERT INTO lessons(id,slug,title,position,module_id) VALUES(1,'lesson-one','Lesson One',1,1),(2,'lesson-two','Lesson Two',2,1)").run();
@@ -41,7 +43,9 @@ describe("Bangkok planner calendar and schedules", () => {
     expect(weekdayForLocalDate("2026-11-14")).toBe(6);
     expect(tasks.map((task) => [task.startsAt, task.endsAt])).toEqual([["18:00","18:15"],["18:15","18:45"],["18:45","19:00"],["19:00","19:15"],["19:15","19:25"],["19:25","19:30"]]);
     expect(tasks.reduce((sum, task) => sum + task.minutes, 0)).toBe(90);
-    expect(tasks.map((task) => task.href)).toEqual(["/learn/lesson-one#vocabulary","/learn/lesson-one#video","/learn/lesson-one#listening","/dashboard#daily-plan","/learn/lesson-one#lesson-activities","/review"]);
+    expect(tasks.map((task) => task.href)).toEqual(["/learn/lesson-one#vocabulary","/learn/lesson-one#lesson-activities","/learn/lesson-one#listening","/dashboard#daily-plan","/learn/lesson-one#lesson-activities","/review"]);
+    expect(tasks[1].title).toContain("อ่านบทเรียน");
+    expect(scheduledTasks("standard", "lesson-one", 0, true)[1]).toMatchObject({ href: "/learn/lesson-one#video", title: expect.stringContaining("วิดีโอ") });
   });
   it("keeps Light Mode to three five-minute tasks and Sunday optional", () => {
     const light = scheduledTasks("light", "lesson-one");
@@ -65,6 +69,11 @@ describe("Bangkok planner calendar and schedules", () => {
       expect(scheduledTasks(mode).every((task) => !task.href.startsWith("/review#"))).toBe(true);
     }
   });
+  it("uses authored reading and listening tasks when no verified teaching video is stored", () => {
+    const tasks = scheduledTasks("standard", "lesson-one");
+    expect(tasks.find((task) => task.key === "video")).toMatchObject({ href: "/learn/lesson-one#lesson-activities", title: expect.stringContaining("อ่านบทเรียน") });
+    expect(tasks.find((task) => task.key === "listening-reading")).toMatchObject({ href: "/learn/lesson-one#listening" });
+  });
 });
 
 describe("progress-aware recommendations", () => {
@@ -73,9 +82,23 @@ describe("progress-aware recommendations", () => {
     database.prepare("INSERT INTO exercises VALUES(1,1,1,'Read ㄱ','Review its sound')").run();
     database.prepare("INSERT INTO checkpoint_attempts(id,lesson_id,score,total,passed) VALUES(1,1,0,1,0)").run();
     database.prepare("INSERT INTO checkpoint_answers(attempt_id,exercise_id,correct) VALUES(1,1,0)").run();
+    database.prepare("INSERT INTO checkpoint_answer_snapshots SELECT 1,1,prompt,'[]',0,'Review its sound','captured' FROM exercises WHERE id=1").run();
+    database.prepare("UPDATE exercises SET prompt='Changed live prompt' WHERE id=1").run();
     expect(recommendStudy(database)).toMatchObject({ lesson: { slug: "lesson-one" }, reason: expect.stringContaining("Read ㄱ"), href: "/learn/lesson-one#checkpoint" });
+    expect(recommendStudy(database).reason).not.toContain("Changed live prompt");
     database.close();
   });
+  it("labels historical prompts as legacy_unverified when their immutable snapshot is unauthenticated", () => {
+    const database = createDb();
+    database.prepare("INSERT INTO exercises VALUES(1,1,1,'Current prompt','Current explanation')").run();
+    database.prepare("INSERT INTO checkpoint_attempts(id,lesson_id,score,total,passed) VALUES(1,1,0,1,0)").run();
+    database.prepare("INSERT INTO checkpoint_answers(attempt_id,exercise_id,correct) VALUES(1,1,0)").run();
+    database.prepare("INSERT INTO checkpoint_answer_snapshots(attempt_id,exercise_id,prompt,options_json,answer_index,explanation,snapshot_kind) VALUES(1,1,'Historical prompt','[]',0,'Historical explanation','legacy_unverified')").run();
+    expect(recommendStudy(database).reason).toContain("Historical prompt");
+    expect(recommendStudy(database).reason).toContain("legacy_unverified");
+    database.close();
+  });
+
   it("moves to the next unlocked lesson after a pass and never recommends locked lessons", () => {
     const database = createDb();
     database.prepare("INSERT INTO checkpoint_attempts(lesson_id,score,total,passed) VALUES(1,5,5,1)").run();

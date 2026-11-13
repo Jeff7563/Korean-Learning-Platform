@@ -40,6 +40,8 @@ test("EPS-TOPIK sources, resumable exam, result and responsive screenshots", asy
   await page.getByRole("button", { name: "ส่งคำตอบ" }).click();
   await expect(page).toHaveURL(/\/eps-topik\/results\//, { timeout: 30000 });
   await expect(page.getByText("คะแนนฝึกเพื่อดูจุดที่ควรทบทวน")).toBeVisible();
+  await expect(page.getByRole("heading", { name: "กลับไปทบทวนทักษะที่ยังพลาด" })).toBeVisible();
+  await expect(page.getByText("บทนี้เปิดหลังผ่าน 40 บทแรก").first()).toBeVisible();
   const resultUrl = page.url();
   await page.screenshot({ path: "test-results/ui-v0.7.1/result-desktop.png", fullPage: true });
 

@@ -2,8 +2,9 @@ export type Question = { prompt: string; options: string[]; answer: number; expl
 import { everydayKoreanLessons } from "./everyday-korean";
 import { koreanGrammarLessons } from "./korean-grammar";
 import { workplaceKoreanLessons } from "./workplace-korean";
+import { epsPreparationLessons } from "./eps-preparation";
 
-export type Lesson = { slug: string; title: string; description: string; objectives: string[]; explanation: string; examples: string[]; activities: string[]; questions: Question[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; video?: { id: string; url: string; creator: string; title: string } };
+export type Lesson = { slug: string; title: string; description: string; objectives: string[]; explanation: string; examples: string[]; activities: string[]; questions: Question[]; vocabulary: { korean: string; thai: string }[]; dialogue?: { speaker: string; korean: string; thai: string }[]; practicePrompts?: string[]; commonMistakes?: string[]; epsPractice?: { mode: "reading" | "listening" | "vocabulary-grammar" | "everyday" | "workplace-safety" | "incorrect"; href: string }[]; video?: { id: string; url: string; creator: string; title: string } };
 const q = (prompt: string, options: string[], answer: number, explanation: string): Question => ({ prompt, options, answer, explanation });
 export const lessons: Lesson[] = [
 {slug:"hangul-intro",title:"รู้จัก 한글 (ฮันกึล)",description:"ทำความรู้จักระบบเขียนภาษาเกาหลีและวิธีประกอบเป็นพยางค์",objectives:["บอกความต่างระหว่างตัวอักษรกับบล็อกพยางค์ได้","ระบุว่าฮันกึลเขียนจากซ้ายไปขวาและบนลงล่างได้"],explanation:"ภาษาเกาหลีเขียนด้วยอักษร 한글 (ฮันกึล) ตัวอักษรพยัญชนะและสระจะจัดวางรวมกันเป็นบล็อกพยางค์ หนึ่งบล็อกแทนหนึ่งพยางค์ เช่น 한 มี ㅎ + ㅏ + ㄴ อ่านเรียงเป็นพยางค์เดียว การถอดเสียงไทยเป็นเพียงตัวช่วยคร่าว ๆ เพราะเสียงบางเสียงไม่มีเสียงไทยที่ตรงกัน",examples:["한글 = ฮันกึล (ตัวอักษรเกาหลี)","가 = ㄱ + ㅏ (บล็อกพยางค์)","한국 = 한 + 국 (ประเทศเกาหลี)"],activities:["สังเกตส่วนประกอบของ 한글, 한, 한국","เขียนคำว่า 한글 หนึ่งครั้ง","ทบทวนคำศัพท์: 한글, 한국"],questions:[q("한글 คืออะไร?",["ระบบอักษรเกาหลี","ชื่อประเทศ","คำลงท้ายสุภาพ"],0,"한글 คือระบบอักษรที่ใช้เขียนภาษาเกาหลี"),q("บล็อก 가 ประกอบจากอะไร?",["ㄱ กับ ㅏ","ㄴ กับ ㅗ","ㅎ กับ ㅏ"],0,"가 ประกอบจากพยัญชนะ ㄱ และสระ ㅏ"),q("ใน 한 มีตัวอักษรกี่ตัว?",["1","2","3"],2,"한 มี ㅎ, ㅏ และ ㄴ รวม 3 ตัวอักษร"),q("คำว่า 한국 แบ่งเป็นกี่บล็อกพยางค์?",["1","2","3"],1,"한국 มีสองบล็อก คือ 한 และ 국"),q("คำอธิบายเสียงไทยของเกาหลีควรเข้าใจอย่างไร?",["ตรงกันทุกเสียง","เป็นเสียงใกล้เคียงเพื่อช่วยเริ่มต้น","ใช้แทนตัวอักษรเกาหลีได้"],1,"เสียงบางเสียงไม่มีคู่ตรงในไทย จึงไม่ควรมองคำอ่านไทยว่าแม่นยำสมบูรณ์")],vocabulary:[{korean:"한글",thai:"อักษรเกาหลี"},{korean:"한국",thai:"ประเทศเกาหลี"}],video:{id:"BbLRZqnryHg",url:"https://www.youtube.com/watch?v=BbLRZqnryHg",creator:"King Sejong Institute Foundation",title:"Learn the Hangul Song, Korean Alphabet"}},
@@ -22,6 +23,7 @@ export const curriculumModules = [
   { slug: "everyday-korean", title: "Everyday Korean", position: 2, lessons: everydayKoreanLessons },
   { slug: "korean-grammar", title: "Korean Grammar", position: 3, lessons: koreanGrammarLessons },
   { slug: "workplace-korean", title: "Workplace Korean", position: 4, lessons: workplaceKoreanLessons },
+  { slug: "eps-topik-preparation", title: "EPS-TOPIK Preparation", position: 5, lessons: epsPreparationLessons },
 ] as const;
 
 export const phases = curriculumModules.map((module) => module.title);

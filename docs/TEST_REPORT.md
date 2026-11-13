@@ -19,3 +19,7 @@ Migration `0008_checkpoint_answer_snapshots.sql` was applied to the local learne
 The old checkpoint rows had no original question snapshots. Their migration backfill preserves the last content stored in the database but cannot establish that it exactly matches what the learner saw on the attempt date. New attempts use captured snapshots.
 
 The EPS question bank and immutable form versioning were not changed. The live AI provider was not configured or tested; E2E Tutor checks, where exercised, use a local test double only.
+
+## V1.0 EPS-TOPIK Preparation
+
+Verification results, post-seed data integrity, lesson totals, E2E screenshots and teacher-review limitations are recorded in [V1.0-EPS-TOPIK-PREPARATION.md](./V1.0-EPS-TOPIK-PREPARATION.md). V1.0 verification passed typecheck, lint, 57 unit tests, production build, and 15 isolated Playwright tests. Playwright continues to use its own temporary SQLite database.
