@@ -84,6 +84,40 @@
 @media(max-width:760px){.planner-panel{padding:17px}.planner-header{display:grid;grid-template-columns:1fr}.planner-header h2{font-size:22px}.planner-date{grid-template-columns:1fr auto;align-items:center}.planner-recommendation{align-items:flex-start;flex-direction:column;padding:14px}.planner-recommendation h3{font-size:17px}.planner-resume{width:100%}.planner-controls{align-items:flex-start;flex-direction:column}.planner-mode{align-items:stretch}.planner-mode>span{flex-basis:100%}.planner-duration{text-align:left}.planner-task{align-items:flex-start}.planner-task-links{align-items:flex-end;padding-top:3px}.planner-records{align-items:flex-start;flex-direction:column}.planner-records>p{text-align:left}}
 .lesson-player #video,.lesson-player #listening,.lesson-player #vocabulary,.lesson-player #lesson-activities,.lesson-player #checkpoint{scroll-margin-top:20px}
 
+/* Optional teacher-authored mini lessons */
+.teacher-tip{border-top:3px solid #f59e0b}
+.teacher-tip-heading{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.teacher-tip-heading h2{margin:2px 0 5px;color:#172554;font-size:20px}
+.teacher-tip-heading>div>p:last-child{margin:0;color:#475569;font-size:13px}
+.teacher-tip-toggle{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-height:42px;padding:9px 12px;border:1px solid #c7d2fe;border-radius:10px;background:#eef2ff;color:#312e81;font-weight:800;cursor:pointer;white-space:nowrap}
+.teacher-tip-toggle:hover{background:#e0e7ff}
+.teacher-tip-body{display:grid;gap:15px;margin-top:17px;padding-top:16px;border-top:1px solid #e2e8f0}
+.teacher-tip-explanation{margin:0;color:#334155;line-height:1.8}
+.teacher-tip-examples{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(220px,100%),1fr));gap:9px}
+.teacher-tip-examples article{display:grid;gap:5px;min-width:0;padding:13px;border:1px solid #dbe2ed;border-radius:12px;background:#f8fafc}
+.teacher-tip-examples strong{color:#172554;font-size:19px;line-height:1.5;overflow-wrap:anywhere}
+.teacher-tip-examples span{color:#334155;font-size:13px}
+.teacher-tip-examples small{color:#64748b;font-size:11px;line-height:1.55}
+.teacher-tip-memory{padding:13px 15px;border-left:3px solid #f59e0b;border-radius:0 11px 11px 0;background:#fffbeb;color:#713f12}
+.teacher-tip-memory strong{font-size:13px}.teacher-tip-memory p{margin:4px 0 0;color:#713f12;font-size:13px;line-height:1.7}
+.teacher-tip-practice{display:grid;gap:10px}
+.teacher-tip-practice-heading{display:flex;align-items:baseline;justify-content:space-between;gap:10px}
+.teacher-tip-practice-heading h3{margin:0;color:#172554;font-size:17px}.teacher-tip-practice-heading span{color:#64748b;font-size:12px;font-weight:700}
+.teacher-tip-question{min-width:0;margin:0;padding:13px;border:1px solid #dbe2ed;border-radius:12px}
+.teacher-tip-question legend{max-width:100%;padding:0 4px;color:#172554;font-size:14px;font-weight:750;line-height:1.6}
+.teacher-tip-question legend>span{color:#4338ca}
+.teacher-tip-question>div{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(170px,100%),1fr));gap:7px;margin-top:6px}
+.teacher-tip-option{display:flex;align-items:center;gap:8px;min-height:42px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;background:white;color:#334155;font-size:13px;cursor:pointer}
+.teacher-tip-option:has(input:checked){border-color:#4f46e5;background:#eef2ff;color:#312e81}
+.teacher-tip-option input{accent-color:#4338ca;flex:none}
+.teacher-tip-feedback{margin:9px 0 0;color:#991b1b;font-size:12px;line-height:1.6}
+.teacher-tip-feedback.correct{color:#166534}
+.teacher-tip-submit{justify-self:start;min-width:150px}
+.teacher-tip-result{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:11px 12px;border:1px solid #bbf7d0;border-radius:10px;background:#f0fdf4;color:#166534;font-size:13px;font-weight:700}
+.teacher-tip-result>svg{flex:none}.teacher-tip-result button{display:inline-flex;align-items:center;gap:5px;min-height:36px;padding:6px 9px;border:1px solid #86efac;border-radius:8px;background:white;color:#166534;font-weight:750;cursor:pointer}
+.teacher-tip button:focus-visible{outline:3px solid #2563eb;outline-offset:3px}
+@media(max-width:640px){.teacher-tip{padding:16px}.teacher-tip-heading{align-items:flex-start;flex-direction:column}.teacher-tip-toggle{width:100%}.teacher-tip-question{padding:10px}.teacher-tip-question>div{grid-template-columns:1fr}.teacher-tip-result{align-items:flex-start}.teacher-tip-submit{width:100%}}
+
 /* V0.5 module-aware course path */
 .course-overview{display:grid;grid-template-columns:1fr auto;gap:8px 15px;margin:18px 0;padding:16px 18px;color:#0f172a}
 .course-overview>span{color:#1d4ed8;font-weight:800}.course-overview .progress-track{grid-column:1/-1;height:8px}

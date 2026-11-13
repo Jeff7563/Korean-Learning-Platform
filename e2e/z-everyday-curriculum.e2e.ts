@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { curriculumModules } from "../src/content/curriculum";
 
 const screenshots = resolve(process.cwd(), "test-results", "ui-v0.5");
+const miniLessonScreenshots = resolve(process.cwd(), "test-results", "ui-v0.7.2");
 
 async function passLesson(request: APIRequestContext, lesson: (typeof curriculumModules)[number]["lessons"][number]) {
   const response = await request.get(`/api/lessons/${lesson.slug}`);
@@ -23,6 +24,7 @@ async function passLesson(request: APIRequestContext, lesson: (typeof curriculum
 test("Everyday Korean unlocks after Hangul and completes as a second module", async ({ page, request }) => {
   test.setTimeout(90_000);
   mkdirSync(screenshots, { recursive: true });
+  mkdirSync(miniLessonScreenshots, { recursive: true });
   page.setDefaultTimeout(12_000);
 
   const coursesResponse = await page.goto("/courses");
@@ -63,6 +65,19 @@ test("Everyday Korean unlocks after Hangul and completes as a second module", as
   await expect(page.locator("#video .media-attribution")).toContainText("Thai PBS ALTV");
   await expect(page.locator("#video .media-attribution a")).toHaveAttribute("href", "https://altv.thaipbs.or.th/programs/tutor-hub/643507794568cccc2a1a67a8?type=episode");
   await expect(page.locator("#listening .listening-item")).toHaveCount(3);
+  await page.getByRole("button", { name: /เปิด Mini Lesson/ }).click();
+  await expect(page.getByRole("heading", { name: "วลีเอาตัวรอด แยกตามสถานการณ์" })).toBeVisible();
+  await expect(page.locator(".teacher-tip-examples article")).toHaveCount(8);
+  await page.setViewportSize({ width: 1440, height: 980 });
+  await page.locator("#teacher-tip").screenshot({ path: resolve(miniLessonScreenshots, "teacher-tip-desktop.png") });
+  await page.locator(".teacher-tip-question").nth(0).getByRole("radio").nth(1).check();
+  await page.locator(".teacher-tip-question").nth(1).getByRole("radio").first().check();
+  await page.locator(".teacher-tip-question").nth(2).getByRole("radio").nth(2).check();
+  await page.getByRole("button", { name: "ตรวจคำตอบ" }).click();
+  await expect(page.getByText(/Mini Lesson นี้เป็นแบบฝึกเสริม/)).toBeVisible();
+  await expect(page.locator("#checkpoint .question-card")).toHaveCount(5);
+  expect((await (await request.get("/api/lessons/everyday-greetings")).json()).attempts).toEqual(publicLesson.attempts);
+  await page.locator(".teacher-tip").screenshot({ path: resolve(miniLessonScreenshots, "teacher-tip-practice-desktop.png") });
   for (const anchor of ["video", "listening", "vocabulary", "lesson-activities", "checkpoint"]) {
     await expect(page.locator(`#${anchor}`)).toHaveCount(1);
   }
@@ -72,6 +87,10 @@ test("Everyday Korean unlocks after Hangul and completes as a second module", as
   await page.locator("#checkpoint").scrollIntoViewIfNeeded();
   await page.locator("#checkpoint").screenshot({ path: resolve(screenshots, "everyday-checkpoint-desktop.png") });
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.locator("#teacher-tip").scrollIntoViewIfNeeded();
+  await page.screenshot({ path: resolve(miniLessonScreenshots, "teacher-tip-mobile.png"), fullPage: true });
+  const tipMobile = await page.evaluate(() => ({ width: document.documentElement.clientWidth, scroll: document.documentElement.scrollWidth }));
+  expect(tipMobile.scroll).toBeLessThanOrEqual(tipMobile.width);
   await page.screenshot({ path: resolve(screenshots, "everyday-lesson-mobile.png"), fullPage: true });
   await page.locator("#checkpoint").scrollIntoViewIfNeeded();
   await page.locator("#checkpoint").screenshot({ path: resolve(screenshots, "everyday-checkpoint-mobile.png") });

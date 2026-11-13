@@ -9,6 +9,8 @@ import { everydayListeningItems } from "@/content/everyday-listening";
 import type { LessonMediaResource } from "@/content/media-catalog";
 import { LessonMedia } from "@/components/lesson-media";
 import { ListeningPractice } from "@/components/listening-practice";
+import { TeacherTip } from "@/components/teacher-tip";
+import { getTeacherTip } from "@/content/teacher-tips";
 
 type Lesson = { slug: string; title: string; description: string; position: number; objectives: string[]; explanation: string; examples: string[]; vocabulary: { korean: string; thai: string }[]; module: { slug: string; title: string; position: number }; videoResources: LessonMediaResource[] };
 type Exercise = { id: number; prompt: string; options: string[] };
@@ -125,6 +127,7 @@ export default function Learn() {
   const next = currentIndex >= 0 ? course[currentIndex + 1] : undefined;
   const completeCount = data.activities.filter((activity) => activity.completed).length;
   const listeningItems = listeningItemsByLesson[slug] ?? everydayListeningItems[slug] ?? lesson.vocabulary;
+  const teacherTip = getTeacherTip(slug);
 
   return <div className="shell lesson-player">
     <header className="player-header">
@@ -148,6 +151,8 @@ export default function Learn() {
         <ListeningPractice items={listeningItems} officialAudioResource={slug === "hangul-review" ? { url: "https://epstopik.hrdkorea.or.kr/epstopik/book/std/standardBookList.do?lang=en", title: "สื่อฝึกฟัง EPS-TOPIK จาก HRD Korea", description: "แหล่งเสริมสำหรับเป้าหมายสอบในระยะถัดไป · เปิดไฟล์ที่เว็บไซต์ต้นทาง" } : undefined} />
 
         <section className="lesson-content panel"><div className="lesson-content-heading"><div><p className="eyebrow">LESSON NOTES</p><h2>ทำความเข้าใจบทเรียน</h2></div><span className="content-language">한국어 · ไทย</span></div><p className="lesson-explanation">{lesson.explanation}</p><button className="examples-toggle" type="button" aria-expanded={showExamples} onClick={() => setShowExamples((value) => !value)}>ตัวอย่างประกอบ {showExamples ? <ChevronUp size={17} /> : <ChevronDown size={17} />}</button>{showExamples && <div className="lesson-examples">{lesson.examples.map((example, index) => <div className="example-line" key={`${index}-${example}`}><span>{String(index + 1).padStart(2, "0")}</span><p>{example}</p></div>)}</div>}</section>
+
+        {teacherTip && <TeacherTip tip={teacherTip} />}
 
         <section className="panel activity-panel lesson-activity-panel" id="lesson-activities"><div className="rail-title"><div><p className="eyebrow">LEARNING ACTIVITIES</p><h2>ฝึกทีละขั้น</h2></div><span className="completion-count">{completeCount}/{data.activities.length}</span></div><p className="section-intro">กิจกรรมฝึกอ่าน เขียน และทบทวน · ทำเครื่องหมายเมื่อฝึกเสร็จ สถานะจะถูกบันทึกไว้</p>{data.activities.map((activity, index) => <label className={`player-activity${activity.completed ? " activity-done" : ""}`} key={activity.id}><input type="checkbox" checked={Boolean(activity.completed)} disabled={savingActivity === activity.id} onChange={(event) => markActivity(activity.id, event.target.checked)} /><span className="activity-checkbox" aria-hidden="true">{activity.completed ? <Check size={14} /> : index + 1}</span><span>{activity.title}</span></label>)}</section>
 

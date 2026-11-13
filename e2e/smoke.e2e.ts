@@ -27,16 +27,20 @@ test("learner completes a lesson and progress survives reload", async ({ page, r
   const correct = [0, 0, 2, 1, 1];
   const wrong = [1, 1, 0, 0, 0];
   for (let index = 0; index < lesson.exercises.length; index++) await page.locator(`input[name="q${lesson.exercises[index].id}"]`).nth(wrong[index]).check();
+  const failedSubmission = page.waitForResponse(response => response.url().endsWith("/api/checkpoints") && response.request().method() === "POST");
   await page.getByRole("button", { name: "ส่งคำตอบ" }).click();
-  await expect(page.locator(".checkpoint-result")).toContainText("0/5");
+  expect((await failedSubmission).ok()).toBeTruthy();
+  await expect(page.locator(".checkpoint-result")).toContainText("0/5", { timeout: 15_000 });
   let course = await request.get("/api/courses");
   let progress = await course.json();
   expect(progress.lessons[0].status).toBe("in_progress");
   expect(progress.lessons[1].status).toBe("locked");
 
   for (let index = 0; index < lesson.exercises.length; index++) await page.locator(`input[name="q${lesson.exercises[index].id}"]`).nth(correct[index]).check();
+  const passedSubmission = page.waitForResponse(response => response.url().endsWith("/api/checkpoints") && response.request().method() === "POST");
   await page.getByRole("button", { name: "ส่งคำตอบ" }).click();
-  await expect(page.locator(".checkpoint-result")).toContainText("5/5");
+  expect((await passedSubmission).ok()).toBeTruthy();
+  await expect(page.locator(".checkpoint-result")).toContainText("5/5", { timeout: 15_000 });
   await page.reload();
   await expect(page).toHaveURL(/\/learn\//);
   await expect(page.getByRole("heading", { name: lesson.lesson.title })).toBeVisible();
