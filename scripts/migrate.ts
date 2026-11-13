@@ -54,4 +54,16 @@ if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(epsImmutable
     db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(epsImmutableFormsMigration);
   })();
 }
+const checkpointSnapshotsMigration = "0008_checkpoint_answer_snapshots.sql";
+if (!db.prepare("SELECT 1 FROM schema_migrations WHERE name=?").get(checkpointSnapshotsMigration)) {
+  const migrationSql = readFileSync(join(process.cwd(), "scripts", "migrations", checkpointSnapshotsMigration), "utf8");
+  db.transaction(() => {
+    db.exec(migrationSql);
+    const missingSnapshots = (db.prepare(`SELECT count(*) count FROM checkpoint_answers ca
+      LEFT JOIN checkpoint_answer_snapshots s ON s.attempt_id=ca.attempt_id AND s.exercise_id=ca.exercise_id
+      WHERE s.attempt_id IS NULL`).get() as { count: number }).count;
+    if (missingSnapshots !== 0) throw new Error(`Checkpoint snapshot backfill incomplete: ${missingSnapshots} answer rows missing`);
+    db.prepare("INSERT INTO schema_migrations(name) VALUES (?)").run(checkpointSnapshotsMigration);
+  })();
+}
 console.log(`Migration ready: ${dbPath}`); db.close();

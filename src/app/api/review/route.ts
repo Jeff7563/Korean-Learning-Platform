@@ -14,11 +14,18 @@ const reviewInput = z.object({
 export async function GET() {
   const database = db();
   const review = getVocabularyReviewData(database);
-  const mistakes = database.prepare(`SELECT l.slug,l.title,m.title moduleTitle,e.prompt,e.explanation,a.created_at
+  const mistakes = database.prepare(`SELECT l.slug,l.title,m.title moduleTitle,COALESCE(s.prompt,e.prompt) prompt,
+    COALESCE(s.explanation,e.explanation) explanation,COALESCE(s.options_json,e.options_json) optionsJson,
+    COALESCE(s.answer_index,e.answer_index) answerIndex,ca.selected_index selectedIndex,s.snapshot_kind snapshotKind,a.created_at
     FROM checkpoint_answers ca JOIN exercises e ON e.id=ca.exercise_id JOIN checkpoint_attempts a ON a.id=ca.attempt_id
+    LEFT JOIN checkpoint_answer_snapshots s ON s.attempt_id=ca.attempt_id AND s.exercise_id=ca.exercise_id
     JOIN lessons l ON l.id=a.lesson_id JOIN modules m ON m.id=l.module_id WHERE ca.correct=0
     ORDER BY a.id DESC LIMIT 20`).all();
-  return NextResponse.json({ ...review, mistakes });
+  const mistakeHistory = (mistakes as Array<{ optionsJson: string; answerIndex: number; selectedIndex: number }>).map((item) => {
+    const options = JSON.parse(item.optionsJson) as string[];
+    return { ...item, options, correctAnswer: options[item.answerIndex], selectedAnswer: options[item.selectedIndex], historicalContentVerified: "snapshotKind" in item && item.snapshotKind === "captured", optionsJson: undefined };
+  });
+  return NextResponse.json({ ...review, mistakes: mistakeHistory });
 }
 
 export async function POST(request: Request) {

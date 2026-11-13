@@ -65,7 +65,12 @@ test("Everyday Korean unlocks after Hangul and completes as a second module", as
   await expect(page.locator("#video .media-attribution")).toContainText("Thai PBS ALTV");
   await expect(page.locator("#video .media-attribution a")).toHaveAttribute("href", "https://altv.thaipbs.or.th/programs/tutor-hub/643507794568cccc2a1a67a8?type=episode");
   await expect(page.locator("#listening .listening-item")).toHaveCount(3);
-  await page.getByRole("button", { name: /เปิด Mini Lesson/ }).click();
+  const tipToggle = page.locator(".teacher-tip-toggle");
+  const controlledTipId = await tipToggle.getAttribute("aria-controls");
+  expect(controlledTipId).toMatch(/^teacher-tip-content-/);
+  await tipToggle.press("Enter");
+  await expect(tipToggle).toHaveAttribute("aria-expanded", "true");
+  await expect(page.locator(`#${controlledTipId}`)).toBeVisible();
   await expect(page.getByRole("heading", { name: "วลีเอาตัวรอด แยกตามสถานการณ์" })).toBeVisible();
   await expect(page.locator(".teacher-tip-examples article")).toHaveCount(8);
   await page.setViewportSize({ width: 1440, height: 980 });

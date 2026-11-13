@@ -2,14 +2,16 @@
   "name": "korean-learning-platform",
   "version": "0.1.0",
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --hostname 127.0.0.1",
     "build": "next build",
-    "start": "next start",
+    "start": "next start --hostname 127.0.0.1",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "db:migrate": "tsx scripts/migrate.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "db:backup": "tsx scripts/backup-database.ts",
+    "db:revise-checkpoint": "tsx scripts/revise-checkpoint.ts",
     "db:setup": "pnpm db:migrate && pnpm db:seed",
     "test:e2e": "playwright test"
   },

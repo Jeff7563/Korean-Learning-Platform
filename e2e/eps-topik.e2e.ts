@@ -16,6 +16,7 @@ test("EPS-TOPIK sources, resumable exam, result and responsive screenshots", asy
   await expect(page.getByText("แบบจำลองแนวข้อสอบรูปแบบเดิม")).toHaveCount(0);
   await page.getByRole("link", { name: "เริ่มหรือทำต่อ" }).first().click();
   await expect(page.getByRole("heading", { name: /ข้อ 1 \/ 20/ })).toBeVisible({ timeout: 30000 });
+  await expect(page.getByRole("progressbar", { name: "Question progress" })).toHaveAttribute("aria-valuenow", "5");
   await expect(page).toHaveURL(/attemptId=/);
   const publicAttempt = await page.request.get(`/api/eps-topik/attempts/${new URL(page.url()).searchParams.get("attemptId")}`);
   expect(await publicAttempt.json()).not.toHaveProperty("answerIndex");

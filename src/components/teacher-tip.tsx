@@ -5,6 +5,7 @@ import { BookOpenCheck, CheckCircle2, ChevronDown, ChevronUp, RotateCcw } from "
 import type { TeacherTip as TeacherTipContent } from "@/content/teacher-tips";
 
 export function TeacherTip({ tip }: { tip: TeacherTipContent }) {
+  const contentId = `teacher-tip-content-${tip.slug}`;
   const [open, setOpen] = useState(false);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
@@ -13,11 +14,11 @@ export function TeacherTip({ tip }: { tip: TeacherTipContent }) {
   return <section className="teacher-tip panel" id="teacher-tip" aria-labelledby="teacher-tip-title">
     <div className="teacher-tip-heading">
       <div><p className="eyebrow">OPTIONAL MINI LESSON</p><h2 id="teacher-tip-title">{tip.title}</h2><p>{tip.objective}</p></div>
-      <button className="teacher-tip-toggle" type="button" aria-expanded={open} onClick={() => setOpen((value) => !value)}>
+      <button className="teacher-tip-toggle" type="button" aria-expanded={open} aria-controls={contentId} onClick={() => setOpen((value) => !value)}>
         <BookOpenCheck size={17} /> {open ? "ปิด Mini Lesson" : "เปิด Mini Lesson"} {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
       </button>
     </div>
-    {open && <div className="teacher-tip-body">
+    <div className="teacher-tip-body" id={contentId} hidden={!open}>
       <p className="teacher-tip-explanation">{tip.explanation}</p>
       <div className="teacher-tip-examples" aria-label="ตัวอย่างประโยค">
         {tip.examples.map((example) => <article key={example.korean}><strong lang="ko">{example.korean}</strong><span>{example.thai}</span>{example.note && <small>{example.note}</small>}</article>)}
@@ -35,6 +36,6 @@ export function TeacherTip({ tip }: { tip: TeacherTipContent }) {
         </fieldset>)}
         {!submitted ? <button className="btn teacher-tip-submit" type="button" disabled={Object.keys(answers).length !== tip.questions.length} onClick={() => setSubmitted(true)}>ตรวจคำตอบ</button> : <div className="teacher-tip-result" role="status"><CheckCircle2 size={18} /><span>ได้ {correct}/{tip.questions.length} ข้อ · Mini Lesson นี้เป็นแบบฝึกเสริม ไม่เปลี่ยนความคืบหน้าบทเรียนหรือ checkpoint</span><button type="button" onClick={() => { setAnswers({}); setSubmitted(false); }}> <RotateCcw size={15} /> ลองอีกครั้ง</button></div>}
       </div>
-    </div>}
+    </div>
   </section>;
 }

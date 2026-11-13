@@ -1,14 +1,21 @@
-# Test report
+# V0.7.3 verification record
 
-## Latest local run
+## Verification commands
 
-- `pnpm db:setup`: passed twice; schema applied and 10 lessons seeded idempotently.
-- `pnpm typecheck`: passed.
-- `pnpm lint`: passed after excluding generated `.next` and `next-env.d.ts` files.
-- `pnpm test`: 4 passed, 0 failed.
-- `pnpm build`: passed; all app pages and API routes compiled.
-- `pnpm test:e2e`: 1 passed. The smoke path opened Dashboard and Lesson 1, checked YouTube embed and fallback, saved an activity, reloaded, failed and retried a checkpoint, verified in-progress and completed states plus the next lesson unlock, and received a response from a local Ollama-compatible test double. An earlier E2E run also asserted the unconfigured AI state returns HTTP 503.
+| Command | Result |
+| --- | --- |
+| `pnpm typecheck` | Passed |
+| `pnpm lint` | Passed |
+| `pnpm test` | Passed: 48 tests in 10 files |
+| `pnpm build` | Passed: production build and 22 static pages generated |
+| `pnpm test:e2e` | Passed: 13 Playwright tests on isolated temporary SQLite |
 
-The E2E run required installing Playwright Chromium locally. These results describe the Windows development environment only.
+E2E includes invalid checkpoint request rejection without progress changes, mobile navigation and keyboard focus, checkpoint history snapshots and persistence, curriculum completion/unlock, EPS simulator semantics, planner, review SRS, and desktop/mobile layout journeys. Playwright uses a unique temporary `KOREAN_DB_PATH`; these runs do not use `data/korean.db`.
 
-Environment: Windows, Node.js 24, pnpm 12. No Ollama installation or `.env.local` provider configuration was detected. The tutor integration was exercised against a local Ollama-compatible test double and its missing-configuration response was checked. Live AI generation was not tested.
+## Database migration verification
+
+Migration `0008_checkpoint_answer_snapshots.sql` was applied to the local learner database after a verified external backup. Before and after migration, the SHA-256 fingerprint of existing learner, checkpoint, planner, Tutor, SRS, and EPS attempt rows was identical. The migration added 10 `legacy_unverified` snapshots for 10 existing checkpoint answers; it did not change their attempts, scores, answers, lesson progress, planner data, SRS records, Tutor messages, or EPS records. After migration, `integrity_check` returned `ok`, `foreign_key_check` returned no rows, and all 10 checkpoint answers had snapshots.
+
+The old checkpoint rows had no original question snapshots. Their migration backfill preserves the last content stored in the database but cannot establish that it exactly matches what the learner saw on the attempt date. New attempts use captured snapshots.
+
+The EPS question bank and immutable form versioning were not changed. The live AI provider was not configured or tested; E2E Tutor checks, where exercised, use a local test double only.

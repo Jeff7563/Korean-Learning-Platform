@@ -34,8 +34,10 @@ database.transaction(() => {
     "INSERT INTO lessons(module_id,slug,title,description,content_json,position) VALUES(?,?,?,?,?,?) ON CONFLICT(slug) DO UPDATE SET title=excluded.title,description=excluded.description,content_json=excluded.content_json",
   );
   const putExercise = database.prepare(
-    "INSERT INTO exercises(lesson_id,position,prompt,options_json,answer_index,explanation) SELECT id,?,?,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,position) DO UPDATE SET prompt=excluded.prompt,options_json=excluded.options_json,answer_index=excluded.answer_index,explanation=excluded.explanation",
+    "INSERT INTO exercises(lesson_id,position,prompt,options_json,answer_index,explanation) SELECT id,?,?,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,position) DO NOTHING",
   );
+  const getExercise = database.prepare(`SELECT e.prompt,e.options_json,e.answer_index,e.explanation
+    FROM exercises e JOIN lessons l ON l.id=e.lesson_id WHERE l.slug=? AND e.position=?`);
   const putActivity = database.prepare(
     "INSERT INTO lesson_activities(lesson_id,slug,title,position) SELECT id,?,?,? FROM lessons WHERE slug=? ON CONFLICT(lesson_id,slug) DO UPDATE SET title=excluded.title,position=excluded.position",
   );
@@ -52,7 +54,12 @@ database.transaction(() => {
       const writeLesson = curriculumModule.slug === "hangul-foundation" ? putHangulLesson : putEverydayLesson;
       writeLesson.run(moduleRow.id, lesson.slug, lesson.title, lesson.description, JSON.stringify(publicLessonContent(lesson)), index + 1);
       for (const [questionIndex, exercise] of lesson.questions.entries()) {
-        putExercise.run(questionIndex + 1, exercise.prompt, JSON.stringify(exercise.options), exercise.answer, exercise.explanation, lesson.slug);
+        const position = questionIndex + 1;
+        putExercise.run(position, exercise.prompt, JSON.stringify(exercise.options), exercise.answer, exercise.explanation, lesson.slug);
+        const stored = getExercise.get(lesson.slug, position) as { prompt: string; options_json: string; answer_index: number; explanation: string } | undefined;
+        if (!stored || stored.prompt !== exercise.prompt || stored.options_json !== JSON.stringify(exercise.options) || stored.answer_index !== exercise.answer || stored.explanation !== exercise.explanation) {
+          throw new Error(`Checkpoint content drift at ${lesson.slug} question ${position}. Normal seeding never revises published questions; review the change and use the explicit db:revise-checkpoint process.`);
+        }
       }
       for (const [activityIndex, activity] of lesson.activities.entries()) {
         putActivity.run(`activity-${activityIndex + 1}`, activity, activityIndex + 1, lesson.slug);

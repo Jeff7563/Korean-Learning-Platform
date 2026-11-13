@@ -9,7 +9,7 @@ test("learner reveals, rates, and resumes vocabulary review on desktop and mobil
   await page.setViewportSize({ width: 1440, height: 1000 });
   await page.goto("/review");
   await expect(page.getByRole("heading", { name: "ทบทวนคำศัพท์" })).toBeVisible();
-  await page.getByRole("button", { name: /คำศัพท์ใหม่/ }).click();
+  await page.locator(".review-tabs").getByRole("button", { name: /คำศัพท์ใหม่/ }).click();
   const card = page.locator(".vocab-card");
   await expect(card.locator(".vocab-korean")).toBeVisible();
   const korean = await card.locator(".vocab-korean").textContent();
